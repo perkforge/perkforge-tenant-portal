@@ -23,14 +23,11 @@ class ChartTests(unittest.TestCase):
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(list(yaml.safe_load_all(result.stdout)), [])
-        self.assertIs(yaml.safe_load((ROOT/'bundles/portal/values.yaml').read_text())['enabled'], False)
+        self.assertIs(yaml.safe_load((CHART/'values.yaml').read_text())['enabled'], False)
 
-    def test_pinned_application_values_stay_disabled_and_render_exact_digest(self):
+    def test_approved_application_values_enable_exact_digest_with_required_inputs(self):
         values = ROOT / 'bundles/portal/values.yaml'
         result = self.render('-f', str(values))
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(list(yaml.safe_load_all(result.stdout)), [])
-        result = self.render('-f', str(values), '--set', 'enabled=true')
         self.assertEqual(result.returncode, 0, result.stderr)
         deployment = next(o for o in yaml.safe_load_all(result.stdout) if o['kind'] == 'Deployment')
         self.assertEqual(deployment['spec']['template']['spec']['imagePullSecrets'], [{'name': 'portal-ghcr'}])
