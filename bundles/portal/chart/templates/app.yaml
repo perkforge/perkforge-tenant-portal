@@ -32,6 +32,10 @@ spec:
     spec:
       serviceAccountName: {{ required "serviceAccount.name must reference an approved existing account" .Values.serviceAccount.name | quote }}
       automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
