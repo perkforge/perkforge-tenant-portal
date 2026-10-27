@@ -1,0 +1,108 @@
+{{- if .Values.enabled }}
+{{- if ne .Release.Namespace "tenant-home-portal" }}
+{{- fail "Only namespace tenant-home-portal is allowed" }}
+{{- end }}
+{{- if not (regexMatch "^sha256:[a-f0-9]{64}$" .Values.image.digest) }}
+{{- fail "An approved immutable image digest is required" }}
+{{- end }}
+{{- if not (regexMatch "^https://[a-zA-Z0-9.-]+(:[0-9]+)?$" .Values.portalOrigin) }}
+{{- fail "An approved HTTPS portal origin is required" }}
+{{- end }}
+{{- if ne .Values.tenantSource "disabled" }}
+{{- fail "GitLab must remain disabled in this release" }}
+{{- end }}
+{{- if not (hasPrefix "https://" .Values.identity.issuer) }}
+{{- fail "A reviewed HTTPS identity issuer is required" }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-portal
+  namespace: {{ .Release.Namespace }}
+  labels: &labels
+    app.kubernetes.io/name: perkforge-portal
+    platform.perkforge.io/tenant: home
+    platform.perkforge.io/application: portal
+spec:
+  replicas: 1
+  # Process-local sessions preclude overlapping replicas during rollouts.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: perkforge-portal
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      serviceAccountName: portal-runtime
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: portal
+        image: {{ printf "%s@%s" .Values.image.repository .Values.image.digest | quote }}
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: [ALL]
+        ports:
+        - name: http
+          containerPort: 3000
+        env:
+        - name: LISTEN_HOST
+          value: '0.0.0.0'
+        - name: PORTAL_ORIGIN
+          value: {{ .Values.portalOrigin | quote }}
+        - name: TENANT_SOURCE
+          value: disabled
+        - name: OIDC_ISSUER
+          value: {{ .Values.identity.issuer | quote }}
+        - name: OIDC_CLIENT_ID
+          value: {{ required "identity.clientId required" .Values.identity.clientId | quote }}
+        - name: OIDC_AUDIENCE
+          value: {{ required "identity.audience required" .Values.identity.audience | quote }}
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ required "operator-managed identity.existingSecret required" .Values.identity.existingSecret | quote }}
+              key: client-secret
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 192Mi
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-portal
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: perkforge-portal
+  ports:
+  - name: http
+    port: 3000
+    targetPort: http
+{{- end }}

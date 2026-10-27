@@ -1,0 +1,12 @@
+enabled: false
+image:
+  repository: ghcr.io/perkforge/perkforge-portal
+  digest: ''
+portalOrigin: ''
+identity:
+  issuer: ''
+  clientId: ''
+  audience: ''
+  existingSecret: ''
+# This release intentionally supports disabled GitLab only.
+tenantSource: disabled
