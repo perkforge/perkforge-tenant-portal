@@ -25,6 +25,18 @@ class ChartTests(unittest.TestCase):
         self.assertEqual(list(yaml.safe_load_all(result.stdout)), [])
         self.assertIs(yaml.safe_load((ROOT/'bundles/portal/values.yaml').read_text())['enabled'], False)
 
+    def test_pinned_application_values_stay_disabled_and_render_exact_digest(self):
+        values = ROOT / 'bundles/portal/values.yaml'
+        result = self.render('-f', str(values))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(list(yaml.safe_load_all(result.stdout)), [])
+        result = self.render('-f', str(values), '--set', 'enabled=true')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        deployment = next(o for o in yaml.safe_load_all(result.stdout) if o['kind'] == 'Deployment')
+        self.assertEqual(deployment['spec']['template']['spec']['imagePullSecrets'], [{'name': 'portal-ghcr'}])
+        image = deployment['spec']['template']['spec']['containers'][0]['image']
+        self.assertEqual(image, 'ghcr.io/perkforge/perkforge-portal@sha256:2e07afbb31fd462911a365893d05796090883464560478bd70179466af5b17b7')
+
     def test_activation_requires_complete_approved_config(self):
         self.assertNotEqual(self.render('--set', 'enabled=true').returncode, 0)
         for key, value in [('image.digest','latest'), ('portalOrigin','http://portal.invalid'), ('identity.issuer','http://identity.invalid'), ('identity.existingSecret',''), ('serviceAccount.name',''), ('tenantSource','live')]:

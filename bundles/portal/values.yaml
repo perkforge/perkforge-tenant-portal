@@ -1,5 +1,10 @@
-# Ordinary application configuration. Activation requires a separately approved image.
+# Ordinary application configuration; pinned release remains disabled pending activation.
 enabled: false
+image:
+  repository: ghcr.io/perkforge/perkforge-portal
+  digest: sha256:2e07afbb31fd462911a365893d05796090883464560478bd70179466af5b17b7
+imagePullSecrets:
+- name: portal-ghcr
 portalOrigin: https://portal.local-lab.test
 identity:
   issuer: https://keycloak.local-lab.test/auth/realms/perkforge

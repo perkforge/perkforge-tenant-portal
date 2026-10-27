@@ -1,6 +1,7 @@
 # Inactive preview and approval gates
 
-No deployment or image exists from this change. Do not apply the rendered output.
+No deployment exists from this change. The application values pin the Actions-published
+v0.2.0 image; enabled remains false. Do not apply the rendered output.
 With Helm3 and Python3/PyYAML installed, run:
 
 ```
@@ -34,3 +35,22 @@ platform ConfigMap lookup is required. The platform repo separately validates th
 inputs and enforces its runtime constraints; passing chart tests is not deployment
 approval or proof of live enforcement. Fleet release-storage permissions remain an
 activation gate owned outside this application repository.
+
+## Prepared image pin
+
+Release: [v0.2.0](https://github.com/perkforge/perkforge-portal/releases/tag/v0.2.0).
+Source: `97efc86121e3f121e852f54e6b65665a7d68acec`.
+[Main Actions run 40586703759](https://github.com/perkforge/perkforge-portal/actions/runs/40586703759)
+published both the version and full-SHA tags with manifest digest
+`sha256:2e07afbb31fd462911a365893d05796090883464560478bd70179466af5b17b7`.
+This is the registry artifact, not the earlier locally preloaded image.
+
+The package must remain private. The application references only the existing
+`portal-ghcr` imagePullSecret in its release namespace; the platform provisions and
+rotates its credential separately. No Secret object or credential belongs in this
+repository. Authenticated pull verification remains an activation gate, requiring
+separate credential-provisioning approval. The runtime does not mount this Secret;
+the kubelet uses it for registry authentication. Production JS dependencies passed
+npm audit and the image passed an isolated smoke check; no OS vulnerability scan or
+live OIDC integration is claimed. Platform image admission and tenant values must pin
+this same digest. Merging alone must not enable portal.
