@@ -24,3 +24,20 @@ capacity/load validation before adoption, not an assumption of available memory.
 The pod explicitly binds 0.0.0.0:3000 inside its namespace. It must be reachable
 only through separately approved internal HTTPS ingress with narrow NetworkPolicy;
 no public DNS or LoadBalancer/NodePort is created. Secure cookies remain mandatory.
+
+## Platform identity connection
+
+Fleet reads non-secret Helm values from platform-owned ConfigMap
+`tenant-home-portal/portal-platform-values`, key `values.yaml`, through the bundle's
+`helm.valuesFrom`. This repository does not create or mutate that ConfigMap. Missing
+configuration fails Fleet rendering. Platform supplies the issuer/client/audience,
+origin, image selection and Secret reference; the client secret stays in a separate
+operator-managed Secret and is never included in Helm values.
+
+Values precedence is not authorization. Tenant-controlled charts can change values
+or remove the reference. Platform-owned admission therefore validates the actual
+workload image, environment, Secret reference, service account and injection paths.
+The runtime cannot be trusted to authorize future privileged platform operations
+merely because configuration was supplied by platform; independent authorization
+is required. Platform's default config keeps this chart disabled and the GitRepo
+paused. No service or security control is activated by this connection.

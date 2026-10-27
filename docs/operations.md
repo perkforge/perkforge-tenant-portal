@@ -27,3 +27,9 @@ Git pin change; do not infer authorization to uninstall or delete Home resources
 
 References: https://fleet.rancher.io/reference/ref-fleet-yaml and
 https://helm.sh/docs/chart_template_guide/values_files/ .
+
+Fleet requires the platform's `portal-platform-values` ConfigMap before rendering;
+plain `helm template` does not perform that lookup. For offline integration, pass
+the platform-generated `helm-values.yaml` explicitly with `-f`. Chart tests use
+synthetic settings only. Platform MR #2 carries the concrete contract, admission
+checks and unresolved activation gates, including release-Secret permissions.

@@ -57,3 +57,9 @@ class ChartTests(unittest.TestCase):
         self.assertEqual(container['resources']['limits']['memory'], '192Mi')
         service = next(o for o in objects if o['kind']=='Service')
         self.assertEqual(service['spec']['type'], 'ClusterIP')
+
+    def test_fleet_reads_only_named_platform_config(self):
+        fleet = yaml.safe_load((ROOT / 'bundles/portal/fleet.yaml').read_text())
+        self.assertEqual(fleet['helm']['valuesFrom'], [{'configMapKeyRef': {
+            'name': 'portal-platform-values', 'namespace': 'tenant-home-portal', 'key': 'values.yaml'}}])
+        self.assertNotIn('values', fleet['helm'])

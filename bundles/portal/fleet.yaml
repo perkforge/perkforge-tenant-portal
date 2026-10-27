@@ -8,3 +8,9 @@ helm:
   releaseName: home-portal
   valuesFiles:
   - values.yaml
+  # Non-secret platform-owned values; missing ConfigMap fails Fleet rendering.
+  valuesFrom:
+  - configMapKeyRef:
+      name: portal-platform-values
+      namespace: tenant-home-portal
+      key: values.yaml
