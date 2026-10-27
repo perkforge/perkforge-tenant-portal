@@ -1,5 +1,5 @@
-# Ordinary application configuration; pinned release remains disabled pending activation.
-enabled: false
+# Reviewed single-replica activation after platform identity, TLS and credential preflight.
+enabled: true
 image:
   repository: ghcr.io/perkforge/perkforge-portal
   digest: sha256:2e07afbb31fd462911a365893d05796090883464560478bd70179466af5b17b7

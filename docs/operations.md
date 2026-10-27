@@ -65,3 +65,12 @@ and host mapping. Revalidate the address if the ingress Service is recreated.
 Node loads `/etc/portal/identity-ca/ca.crt` through `NODE_EXTRA_CA_CERTS`; TLS verification
 remains enabled. No private CA key is mounted. Restart the application after CA rotation.
 The bundle remains disabled until operator credential, ingress and identity checks pass.
+
+## Approved initial activation
+
+The reviewed bundle now enables exactly one portal replica with the existing v0.2.0
+immutable digest. Platform registration remains independently pinned and paused until
+its activation change is merged. Identity/TLS/credentials and positive/negative server
+dry-runs were verified first. GitLab remains disabled; successful Home-user login and
+actual kubelet image pull are post-activation acceptance checks, not claimed results.
+The reusable chart default remains disabled.
