@@ -54,3 +54,14 @@ the kubelet uses it for registry authentication. Production JS dependencies pass
 npm audit and the image passed an isolated smoke check; no OS vulnerability scan or
 live OIDC integration is claimed. Platform image admission and tenant values must pin
 this same digest. Merging alone must not enable portal.
+
+## Local identity CA
+
+The reviewed local values reference an existing public CA ConfigMap, `portal-identity-ca`,
+and map only `keycloak.local-lab.test` to the current internal ingress Service address
+`10.43.163.193`. These are ordinary runtime inputs; the chart creates no CA, credentials,
+DNS server or policy. Platform independently validates the exact mount, environment
+and host mapping. Revalidate the address if the ingress Service is recreated.
+Node loads `/etc/portal/identity-ca/ca.crt` through `NODE_EXTRA_CA_CERTS`; TLS verification
+remains enabled. No private CA key is mounted. Restart the application after CA rotation.
+The bundle remains disabled until operator credential, ingress and identity checks pass.

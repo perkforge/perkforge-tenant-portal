@@ -36,6 +36,19 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.identity.hostAliases }}
+      hostAliases:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.identity.caConfigMap }}
+      volumes:
+      - name: identity-ca
+        configMap:
+          name: {{ .Values.identity.caConfigMap | quote }}
+          items:
+          - key: ca.crt
+            path: ca.crt
+      {{- end }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -54,7 +67,17 @@ spec:
         ports:
         - name: http
           containerPort: 3000
+        {{- if .Values.identity.caConfigMap }}
+        volumeMounts:
+        - name: identity-ca
+          mountPath: /etc/portal/identity-ca
+          readOnly: true
+        {{- end }}
         env:
+        {{- if .Values.identity.caConfigMap }}
+        - name: NODE_EXTRA_CA_CERTS
+          value: /etc/portal/identity-ca/ca.crt
+        {{- end }}
         - name: LISTEN_HOST
           value: '0.0.0.0'
         - name: PORTAL_ORIGIN
