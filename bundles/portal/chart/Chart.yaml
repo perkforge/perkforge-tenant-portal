@@ -1,0 +1,6 @@
+apiVersion: v2
+name: household-portal
+description: Inactive-by-default internal Home tenant portal
+type: application
+version: 0.1.0
+appVersion: 0.1.0

@@ -1,0 +1,10 @@
+# Ordinary application configuration. Activation requires a separately approved image.
+enabled: false
+portalOrigin: https://portal.local-lab.test
+identity:
+  issuer: https://keycloak.local-lab.test/auth/realms/perkforge
+  clientId: household-portal
+  audience: household-portal-api
+  existingSecret: portal-oidc
+serviceAccount:
+  name: portal-runtime

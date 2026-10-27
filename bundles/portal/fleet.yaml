@@ -1,0 +1,6 @@
+name: tenant-home-portal-app
+helm:
+  chart: ./chart
+  releaseName: home-portal
+  valuesFiles:
+  - values.yaml
