@@ -6,6 +6,8 @@ image:
 imagePullSecrets: []
 portalOrigin: ''
 identity:
+  caConfigMap: ""
+  hostAliases: []
   issuer: ''
   clientId: ''
   audience: ''

@@ -7,6 +7,11 @@ imagePullSecrets:
 - name: portal-ghcr
 portalOrigin: https://portal.local-lab.test
 identity:
+  caConfigMap: portal-identity-ca
+  # Local lab ingress address; no global DNS or platform-label dependency.
+  hostAliases:
+  - ip: 10.43.163.193
+    hostnames: [keycloak.local-lab.test]
   issuer: https://keycloak.local-lab.test/auth/realms/perkforge
   clientId: household-portal
   audience: household-portal-api

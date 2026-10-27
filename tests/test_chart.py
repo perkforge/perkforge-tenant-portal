@@ -34,6 +34,12 @@ class ChartTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         deployment = next(o for o in yaml.safe_load_all(result.stdout) if o['kind'] == 'Deployment')
         self.assertEqual(deployment['spec']['template']['spec']['imagePullSecrets'], [{'name': 'portal-ghcr'}])
+        pod = deployment['spec']['template']['spec']
+        self.assertEqual(pod['hostAliases'], [{'ip':'10.43.163.193','hostnames':['keycloak.local-lab.test']}])
+        self.assertEqual(pod['volumes'], [{'name':'identity-ca','configMap':{'name':'portal-identity-ca','items':[{'key':'ca.crt','path':'ca.crt'}]}}])
+        container = pod['containers'][0]
+        self.assertEqual(container['volumeMounts'], [{'name':'identity-ca','mountPath':'/etc/portal/identity-ca','readOnly':True}])
+        self.assertIn({'name':'NODE_EXTRA_CA_CERTS','value':'/etc/portal/identity-ca/ca.crt'}, container['env'])
         image = deployment['spec']['template']['spec']['containers'][0]['image']
         self.assertEqual(image, 'ghcr.io/perkforge/perkforge-portal@sha256:2e07afbb31fd462911a365893d05796090883464560478bd70179466af5b17b7')
 
