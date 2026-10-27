@@ -1,16 +1,6 @@
 name: tenant-home-portal-app
-defaultNamespace: tenant-home-portal
-labels:
-  platform.perkforge.io/tenant: home
-  platform.perkforge.io/application: portal
 helm:
   chart: ./chart
   releaseName: home-portal
   valuesFiles:
   - values.yaml
-  # Non-secret platform-owned values; missing ConfigMap fails Fleet rendering.
-  valuesFrom:
-  - configMapKeyRef:
-      name: portal-platform-values
-      namespace: tenant-home-portal
-      key: values.yaml

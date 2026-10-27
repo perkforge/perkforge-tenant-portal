@@ -17,7 +17,7 @@ class ChartTests(unittest.TestCase):
                            '--set', 'portalOrigin=https://portal.example.invalid',
                            '--set', 'identity.issuer=https://identity.example.invalid/realms/home',
                            '--set', 'identity.clientId=fixture', '--set', 'identity.audience=fixture-api',
-                           '--set', 'identity.existingSecret=fixture-secret', *extra)
+                           '--set', 'identity.existingSecret=fixture-secret', '--set', 'serviceAccount.name=fixture-runtime', *extra)
 
     def test_disabled_renders_nothing(self):
         result = self.render()
@@ -27,9 +27,8 @@ class ChartTests(unittest.TestCase):
 
     def test_activation_requires_complete_approved_config(self):
         self.assertNotEqual(self.render('--set', 'enabled=true').returncode, 0)
-        for key, value in [('image.digest','latest'), ('portalOrigin','http://portal.invalid'), ('identity.issuer','http://identity.invalid'), ('identity.existingSecret',''), ('tenantSource','live')]:
+        for key, value in [('image.digest','latest'), ('portalOrigin','http://portal.invalid'), ('identity.issuer','http://identity.invalid'), ('identity.existingSecret',''), ('serviceAccount.name',''), ('tenantSource','live')]:
             self.assertNotEqual(self.enabled('--set', f'{key}={value}').returncode, 0, key)
-        self.assertNotEqual(self.enabled('--namespace', 'default').returncode, 0)
 
     def test_only_namespaced_application_objects_and_hardened_runtime(self):
         result = self.enabled()
@@ -45,7 +44,7 @@ class ChartTests(unittest.TestCase):
         self.assertEqual(deployment['spec']['strategy']['type'], 'Recreate')
         pod = deployment['spec']['template']['spec']
         self.assertIs(pod['automountServiceAccountToken'], False)
-        self.assertEqual(pod['serviceAccountName'], 'portal-runtime')
+        self.assertEqual(pod['serviceAccountName'], 'fixture-runtime')
         self.assertIs(pod['securityContext']['runAsNonRoot'], True)
         container = pod['containers'][0]
         self.assertIs(container['securityContext']['readOnlyRootFilesystem'], True)
@@ -58,8 +57,15 @@ class ChartTests(unittest.TestCase):
         service = next(o for o in objects if o['kind']=='Service')
         self.assertEqual(service['spec']['type'], 'ClusterIP')
 
-    def test_fleet_reads_only_named_platform_config(self):
+    def test_application_has_no_platform_transport_or_routing_dependency(self):
         fleet = yaml.safe_load((ROOT / 'bundles/portal/fleet.yaml').read_text())
-        self.assertEqual(fleet['helm']['valuesFrom'], [{'configMapKeyRef': {
-            'name': 'portal-platform-values', 'namespace': 'tenant-home-portal', 'key': 'values.yaml'}}])
-        self.assertNotIn('values', fleet['helm'])
+        self.assertEqual(fleet['helm']['valuesFiles'], ['values.yaml'])
+        self.assertNotIn('valuesFrom', fleet['helm'])
+        self.assertNotIn('defaultNamespace', fleet)
+        self.assertNotIn('labels', fleet)
+        result = self.enabled('--namespace', 'another-tenant')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        objects = list(yaml.safe_load_all(result.stdout))
+        self.assertTrue(all(o['metadata']['namespace'] == 'another-tenant' for o in objects))
+        self.assertNotIn('platform.perkforge.io', result.stdout)
+        self.assertNotIn('portal-platform-values', (ROOT / 'bundles/portal/fleet.yaml').read_text())

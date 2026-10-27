@@ -1,7 +1,4 @@
 {{- if .Values.enabled }}
-{{- if ne .Release.Namespace "tenant-home-portal" }}
-{{- fail "Only namespace tenant-home-portal is allowed" }}
-{{- end }}
 {{- if not (regexMatch "^sha256:[a-f0-9]{64}$" .Values.image.digest) }}
 {{- fail "An approved immutable image digest is required" }}
 {{- end }}
@@ -17,12 +14,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: home-portal
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels: &labels
     app.kubernetes.io/name: perkforge-portal
-    platform.perkforge.io/tenant: home
-    platform.perkforge.io/application: portal
 spec:
   replicas: 1
   # Process-local sessions preclude overlapping replicas during rollouts.
@@ -35,7 +30,7 @@ spec:
     metadata:
       labels: *labels
     spec:
-      serviceAccountName: portal-runtime
+      serviceAccountName: {{ required "serviceAccount.name must reference an approved existing account" .Values.serviceAccount.name | quote }}
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
@@ -95,7 +90,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: home-portal
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
