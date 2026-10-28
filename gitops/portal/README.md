@@ -39,3 +39,12 @@ python3 -m unittest discover -s tests -v
 
 The default chart render must contain no workloads. Local build/schema checks
 cannot prove live API authorization, session revocation or tenant isolation.
+
+The separate platform-owned
+[enrollment repository](https://github.com/perkforge/perkforge-platform-tenants)
+selects this entrypoint explicitly per cluster. It owns the source pin and scoped
+parent reconciler; this repository owns the app release and values. Companion
+PRs use exact feature-commit pins for review only. Merge this app-entrypoint PR
+first, then advance the enrollment pin to the approved merged commit; enrollment
+merges next, and platform root references advance last. Revalidate each new pin.
+A merge does not unsuspend or authorize any deployment.
