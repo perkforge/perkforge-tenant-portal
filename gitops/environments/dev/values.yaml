@@ -3,4 +3,3 @@ portalOrigin: https://portal.dev.example.invalid
 identity:
   issuer: https://identity.dev.example.invalid
   clientId: example-dev-client
-  audience: example-portal

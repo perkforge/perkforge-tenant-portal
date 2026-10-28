@@ -23,5 +23,8 @@ spec:
     name: portal-environment
     valuesKey: values.yaml
   - kind: ConfigMap
+    name: portal-profile
+    valuesKey: values.yaml
+  - kind: ConfigMap
     name: portal-cluster
     valuesKey: values.yaml
