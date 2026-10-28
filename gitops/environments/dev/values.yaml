@@ -1,5 +1,3 @@
-# Illustrative app endpoints only; no live identity/client registration is implied.
-portalOrigin: https://portal.dev.example.invalid
+# Example client name only; endpoints belong to the named cluster.
 identity:
-  issuer: https://identity.dev.example.invalid
   clientId: example-dev-client

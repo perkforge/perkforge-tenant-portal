@@ -53,7 +53,7 @@ class FluxLayoutTests(unittest.TestCase):
         return [obj for obj in yaml.safe_load_all(output) if obj]
 
     def test_roots_remain_app_only_suspended_and_disabled(self):
-        for cluster in ("local", "dev-il2", "dev-il5"):
+        for cluster in ("local", "dev"):
             with self.subTest(cluster=cluster):
                 objects = self.build(cluster)
                 self.assertEqual({obj["kind"] for obj in objects},
@@ -67,21 +67,19 @@ class FluxLayoutTests(unittest.TestCase):
                                  ["portal-defaults", "portal-environment", "portal-profile", "portal-cluster"])
                 self.assertEqual(self.render(objects), [])
 
-    def test_two_dev_clusters_share_environment_with_last_cluster_override(self):
-        origins = {"dev-il2": "https://portal.dev-il2.example.invalid",
-                   "dev-il5": "https://portal.dev-il5.example.invalid"}
-        for cluster, origin in origins.items():
+    def test_cluster_hosts_and_identity_follow_ordered_values(self):
+        for cluster in ("local", "dev"):
             with self.subTest(cluster=cluster):
                 objects = self.render(self.build(cluster), enabled=True)
                 self.assertEqual({obj["kind"] for obj in objects}, {"Deployment", "Service"})
                 pod = next(obj for obj in objects if obj["kind"] == "Deployment")["spec"]["template"]["spec"]
                 env = {item["name"]: item for item in pod["containers"][0]["env"]}
-                self.assertEqual(env["PORTAL_ORIGIN"]["value"], origin)
+                self.assertEqual(env["PORTAL_ORIGIN"]["value"],
+                                 f"https://portal-{cluster}-il2.local-lab.test")
                 self.assertEqual(env["OIDC_ISSUER"]["value"],
-                                 "https://identity.dev.example.invalid")
-                self.assertEqual(env["OIDC_CLIENT_ID"]["value"], "example-dev-client")
-                self.assertEqual(env["OIDC_AUDIENCE"]["value"],
-                                 "example-portal-" + ("il2" if cluster == "dev-il2" else "il5"))
+                                 f"https://keycloak-{cluster}-il2.local-lab.test/realms/household")
+                self.assertEqual(env["OIDC_CLIENT_ID"]["value"], f"example-{cluster}-client")
+                self.assertEqual(env["OIDC_AUDIENCE"]["value"], "example-portal-il2")
                 self.assertEqual(env["OIDC_CLIENT_SECRET"]["valueFrom"]["secretKeyRef"]["name"],
                                  "portal-oidc-existing")
                 self.assertEqual(pod["serviceAccountName"], "portal-runtime")
@@ -91,34 +89,35 @@ class FluxLayoutTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             tree = Path(directory) / "gitops"
             shutil.copytree(ROOT / "gitops", tree)
-            shutil.copytree(tree / "clusters/dev-il5", tree / "clusters/team-dev")
+            shutil.copytree(tree / "clusters/dev", tree / "clusters/team-dev")
             selection = tree / "clusters/team-dev/kustomization.yaml"
             data = yaml.safe_load(selection.read_text())
             data["commonAnnotations"]["example.perkforge.io/cluster"] = "team-dev"
             selection.write_text(yaml.safe_dump(data, sort_keys=False))
             (tree / "clusters/team-dev/values.yaml").write_text(
-                "portalOrigin: https://portal.team-dev.example.invalid\n")
+                "portalOrigin: https://portal-team-dev-il2.local-lab.test\n"
+                "identity:\n  issuer: https://keycloak-dev-il2.local-lab.test/realms/household\n")
             objects = self.render(self.build("team-dev", tree), enabled=True)
             pod = next(obj for obj in objects if obj["kind"] == "Deployment")["spec"]["template"]["spec"]
             env = {item["name"]: item for item in pod["containers"][0]["env"]}
             self.assertEqual(env["PORTAL_ORIGIN"]["value"],
-                             "https://portal.team-dev.example.invalid")
+                             "https://portal-team-dev-il2.local-lab.test")
             self.assertEqual(env["OIDC_ISSUER"]["value"],
-                             "https://identity.dev.example.invalid")
+                             "https://keycloak-dev-il2.local-lab.test/realms/household")
 
     def test_enablement_without_an_approved_digest_fails_closed(self):
         with self.assertRaises(subprocess.CalledProcessError) as error:
-            self.render(self.build("dev-il2"), enabled=True, digest=False)
+            self.render(self.build("dev"), enabled=True, digest=False)
         self.assertIn("immutable image digest", error.exception.output)
 
     def test_mismatched_environment_profile_or_cluster_is_rejected(self):
-        for kind, wrong in (("environment", "local"), ("profile", "il5"), ("cluster", "other-dev")):
+        for kind, wrong in (("environment", "local"), ("profile", "unselected-profile"), ("cluster", "other-dev")):
             with self.subTest(kind=kind), tempfile.TemporaryDirectory() as directory:
                 tree = Path(directory) / "gitops"
                 shutil.copytree(ROOT / "gitops", tree)
-                selection = tree / "clusters/dev-il2/kustomization.yaml"
+                selection = tree / "clusters/dev/kustomization.yaml"
                 root = yaml.safe_load(selection.read_text())
                 root["commonAnnotations"]["example.perkforge.io/" + kind] = wrong
                 selection.write_text(yaml.safe_dump(root, sort_keys=False))
                 with self.assertRaises(AssertionError):
-                    self.build("dev-il2", tree)
+                    self.build("dev", tree)

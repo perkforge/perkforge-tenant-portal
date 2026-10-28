@@ -1,1 +1,4 @@
-{}
+# Routing/TLS is platform-owned; this chart creates no ingress.
+portalOrigin: https://portal-local-il2.local-lab.test
+identity:
+  issuer: https://keycloak-local-il2.local-lab.test/realms/household

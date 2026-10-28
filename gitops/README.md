@@ -1,107 +1,80 @@
-# Paused tenant app: shared → environment → profile → cluster
+# Paused portal: shared → environment → profile → cluster
 
-This optional Flux layout owns only the portal application. The existing Fleet
-bundle and `bundles/portal/chart` (`household-portal` 0.1.0) are unchanged; no
-chart or generated workload YAML is copied. Every release stays suspended and
-shared app values keep `enabled: false`. Start from a named cluster root, never
-apply `shared/` alone.
+Start at `clusters/local/kustomization.yaml` or `clusters/dev/kustomization.yaml`.
+Local means local VMs; dev means the future physical cluster. Both select il2.
+Cluster identity, environment and profile remain independent inputs.
 
 ```text
-shared/                    # one app release + shared values
-  release.yaml             # chart ref and explicit ordered valuesFrom
-  values.yaml
-  kustomization.yaml
-environments/{local,dev}/   # small reusable app values only
-profiles/{il2,il5}/         # illustrative app audience inputs, not security controls
-clusters/{local,dev-il2,dev-il5}/
-  kustomization.yaml       # selects shared + one environment
-  values.yaml              # only this cluster's overrides (may be empty)
+shared/                   # one chart reference/release + disabled defaults
+environments/{local,dev}/  # reusable app settings
+profiles/il2/             # illustrative app input
+clusters/{local,dev}/      # explicit entrypoints and final overrides
 ```
 
-Cluster identity and environment are independent. `dev-il2` and `dev-il5`
-explicitly select the same `environments/dev` input but have different illustrative
-origins and profile choices (`il2` and `il5`). `local` selects `environments/local`. These aliases do not imply hosting,
-Kubernetes distribution or security/impact level; none of those platform settings
-belongs in this app repository.
+- `environments/{local,dev}/values.yaml`: reusable client-name examples.
+- `profiles/il2/values.yaml`: illustrative supported `identity.audience` input.
+- `clusters/{local,dev}/kustomization.yaml`: explicit shared/environment/profile selection.
+- `clusters/{local,dev}/values.yaml`: per-cluster origin and issuer.
 
-`shared/release.yaml` consumes `portal-defaults`, then `portal-environment`,
-`portal-profile`, and `portal-cluster`. Each ConfigMap carries a `values.yaml` key. **Later values win**;
-chart defaults precede all three. Maps merge and lists replace. No inline
-`spec.values` adds a hidden override. Example: environment dev supplies issuer
-and client ID; the app profile selects an illustrative audience, the cluster
-changes only origin, and the shared secret-name
-reference remains. Endpoints/client IDs are `.invalid` examples, not approved
-OIDC registrations or shared credentials. Review real per-cluster clients,
-callbacks, secret references and image pins before enablement.
+The existing `bundles/portal/chart` (`household-portal` 0.1.0) is referenced, not
+copied. Legacy Fleet behavior is unchanged. Helm `valuesFrom` order is
+`portal-defaults` → `portal-environment` → `portal-profile` → `portal-cluster`.
+Later values win; maps merge and lists replace; no inline values hide another layer.
 
-## Explicit cross-repository selection
-
-| Cluster identity | Environment | Profile | App audience example |
+| Target | Environment / profile | Origin | Issuer |
 | --- | --- | --- | --- |
-| local | local | il2 | example-portal-il2 |
-| dev-il2 | dev | il2 | example-portal-il2 |
-| dev-il5 | dev | il5 | example-portal-il5 |
+| local | local / il2 | https://portal-local-il2.local-lab.test | https://keycloak-local-il2.local-lab.test/realms/household |
+| dev | dev / il2 | https://portal-dev-il2.local-lab.test | https://keycloak-dev-il2.local-lab.test/realms/household |
 
-The native Kustomize `commonAnnotations` fields `example.perkforge.io/cluster`,
-`environment`, and `profile` make the selected context visible on built Flux
-objects. The platform selects a named cluster/environment/profile; enrollment
-records the same context and selects the same app cluster root. Tests compare
-all three pinned repositories, the actual source paths and selected environment/
-profile inputs. This is an explicit checked contract, not magical propagation.
+These are configurable test-host contracts, not configured DNS/TLS or registered
+clients. The application callback is `<origin>/auth/callback`; register that exact
+URI and approved web origin later. The chart consumes `portalOrigin` and
+`identity.issuer/clientId/audience/existingSecret`; it creates no ingress or
+identity client. Platform enrollment owns routing/TLS and secret provisioning.
+The realm, client names and audience need review, as do the approved image digest
+and existing secret/account references. No live identity changes are included.
 
-App profiles contain a real supported chart input (`identity.audience`) to show
-how profile-specific app settings compose. The `.invalid` identity endpoints
-and `example-*` audiences are illustrative only, not IL2/IL5 policy requirements,
-approved identity registrations or evidence of authorization. Real app differences
-need review; these files cannot configure or weaken platform RBAC, namespace,
-NetworkPolicy, admission or other security controls. Context annotations are
-untrusted app claims checked against platform Git, not security enforcement.
+## Add or change an input
 
-## Add a cluster
+- **Cluster:** copy `clusters/dev/`, update its cluster annotation, selected environment/profile
+  and values. Enrollment must explicitly select `./gitops/clusters/<name>`.
+- **Environment:** add a small `environments/<name>/` values/Kustomization pair,
+  select it in the cluster root, and update the environment annotation.
+- **Profile:** add `profiles/<name>/` only for real supported app differences;
+  update the selection and annotation. Future il5 is guidance only, not supplied
+  configuration or an authorization claim. App settings cannot relax platform controls.
 
-Copy the small `clusters/dev-il5/` directory to a unique cluster name,
-select the desired existing environment/profile in its `kustomization.yaml`,
-update its cluster context annotation, and edit
-only its app overrides. Reuse environment values rather than copying them.
-Then platform enrollment must explicitly select `./gitops/clusters/<name>` in
-its pinned source; adding a directory here enrolls nothing automatically. Both dev examples share environment defaults but select separate profiles. The
-companion enrollment must explicitly opt in to every named cluster.
+Several clusters can reuse `environments/dev` without copying it. Adding a folder
+enrolls nothing. Matching cluster/environment/profile annotations are checked
+against protected platform/enrollment Git at exact pins; they do not enforce security.
 
-## Platform boundary and review pins
+## Ownership and review order
 
-The separate [platform-owned enrollment repository](https://github.com/perkforge/perkforge-platform-tenants)
-creates `GitRepository/tenant-portal` and a scoped Flux Kustomization targeting
-one named-cluster path in a separately approved tenant namespace. Its service
-account applies only approved app release/config objects. This repository creates
-no Namespace, ServiceAccount, RBAC, Secret, policy or platform enrollment.
+Platform-owned `perkforge-platform-tenants` enrolls this source under scoped
+identities. This app Git creates only ConfigMaps and a paused HelmRelease: no
+Namespace, ServiceAccount, RBAC, policy, Secret or Big Bang configuration.
+`portal-deployer`, `portal-runtime`, isolated Helm storage and parent
+`portal-reconciler` are unprovisioned reviewed contracts. Missing prerequisites
+must fail closed; no broad fallback is allowed. Foundation/admission must constrain
+identities, namespaces, sources, secrets and images before activation.
 
-The app HelmRelease uses `spec.serviceAccountName: portal-deployer`, separate
-`storageNamespace: tenant-example-portal-release`, and runtime `portal-runtime`.
-These are unprovisioned platform contracts. Platform RBAC/admission must constrain
-source/identity/target/storage/secret/image fields; app values grant no capability.
-The parent supplies the runtime namespace through targetNamespace. Missing
-prerequisites must fail closed, never fall back to a broad account.
-
-Companion pins are exact feature commits for review only, not production refs.
-Merge app first, then advance/revalidate enrollment's app pin; merge enrollment,
-then advance/revalidate platform's enrollment pin. Merge does not unsuspend.
-Live identity/RBAC/admission/network/TLS, capacity, credentials, recovery and
-controller handoff remain separately approved. Never let Fleet and Flux own the
-same release/workloads. The application source repository is unchanged.
+Merge [app #5](https://github.com/perkforge/perkforge-tenant-portal/pull/5) first;
+pause to advance/revalidate the app commit in [enrollment #1](https://github.com/perkforge/perkforge-platform-tenants/pull/1).
+After enrollment merges, pause to advance/revalidate its commit in
+[platform #47](https://github.com/perkforge/perkforge-platform/pull/47).
+Squash/rebase changes SHAs. Review pins are not production refs. Merge never unsuspends.
 
 ## Offline checks
 
 ```sh
 kubectl kustomize gitops/clusters/local > /tmp/portal-local.yaml
-kubectl kustomize gitops/clusters/dev-il2 > /tmp/portal-dev-il2.yaml
-kubectl kustomize gitops/clusters/dev-il5 > /tmp/portal-dev-il5.yaml
+kubectl kustomize gitops/clusters/dev > /tmp/portal-dev.yaml
 python3 -m unittest discover -s tests -v
 ```
 
-Tests feed actual assembled ConfigMap references to the existing chart in the
-release's valuesFrom order. Default renders emit no workloads. Synthetic enabled
-renders verify two clusters sharing dev, il2/il5 audience composition, override precedence, inherited settings,
-adding another cluster, environment/profile/target mismatch rejection and failed
-activation without a digest; fixture values
-are not deployment recommendations. Output stays temporary. No API calls or
-live tenant isolation/readiness claims result from these checks.
+Tests render the actual ordered ConfigMaps through the existing chart. Disabled
+renders emit no workloads. Synthetic enabled renders check origins/issuers,
+precedence, shared dev reuse, mismatch rejection and missing-digest rejection.
+No generated YAML is committed. Live capacity, credentials, OIDC/RBAC/admission,
+network/TLS, tenant denials, controller ownership and recovery remain separate
+approval gates. Fleet and Flux must never own the same workloads.

@@ -1,4 +1,0 @@
-# Illustrative app audience selection only, not DoD policy or authorization.
-# Real audiences/clients need identity review before activation.
-identity:
-  audience: example-portal-il5
