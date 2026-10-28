@@ -11,6 +11,6 @@ configMapGenerator:
 generatorOptions:
   disableNameSuffixHash: true
 commonAnnotations:
-  example.perkforge.io/cluster: dev
+  example.perkforge.io/cluster: dev-il2
   example.perkforge.io/environment: dev
   example.perkforge.io/profile: il2

@@ -13,12 +13,12 @@ shared/                    # one app release + shared values
   kustomization.yaml
 environments/{local,dev}/   # small reusable app values only
 profiles/{il2,il5}/         # illustrative app audience inputs, not security controls
-clusters/{local,dev,dev-secondary}/
+clusters/{local,dev-il2,dev-il5}/
   kustomization.yaml       # selects shared + one environment
   values.yaml              # only this cluster's overrides (may be empty)
 ```
 
-Cluster identity and environment are independent. `dev` and `dev-secondary`
+Cluster identity and environment are independent. `dev-il2` and `dev-il5`
 explicitly select the same `environments/dev` input but have different illustrative
 origins and profile choices (`il2` and `il5`). `local` selects `environments/local`. These aliases do not imply hosting,
 Kubernetes distribution or security/impact level; none of those platform settings
@@ -39,8 +39,8 @@ callbacks, secret references and image pins before enablement.
 | Cluster identity | Environment | Profile | App audience example |
 | --- | --- | --- | --- |
 | local | local | il2 | example-portal-il2 |
-| dev | dev | il2 | example-portal-il2 |
-| dev-secondary | dev | il5 | example-portal-il5 |
+| dev-il2 | dev | il2 | example-portal-il2 |
+| dev-il5 | dev | il5 | example-portal-il5 |
 
 The native Kustomize `commonAnnotations` fields `example.perkforge.io/cluster`,
 `environment`, and `profile` make the selected context visible on built Flux
@@ -59,7 +59,7 @@ untrusted app claims checked against platform Git, not security enforcement.
 
 ## Add a cluster
 
-Copy the small `clusters/dev-secondary/` directory to a unique cluster name,
+Copy the small `clusters/dev-il5/` directory to a unique cluster name,
 select the desired existing environment/profile in its `kustomization.yaml`,
 update its cluster context annotation, and edit
 only its app overrides. Reuse environment values rather than copying them.
@@ -93,8 +93,8 @@ same release/workloads. The application source repository is unchanged.
 
 ```sh
 kubectl kustomize gitops/clusters/local > /tmp/portal-local.yaml
-kubectl kustomize gitops/clusters/dev > /tmp/portal-dev.yaml
-kubectl kustomize gitops/clusters/dev-secondary > /tmp/portal-dev-secondary.yaml
+kubectl kustomize gitops/clusters/dev-il2 > /tmp/portal-dev-il2.yaml
+kubectl kustomize gitops/clusters/dev-il5 > /tmp/portal-dev-il5.yaml
 python3 -m unittest discover -s tests -v
 ```
 

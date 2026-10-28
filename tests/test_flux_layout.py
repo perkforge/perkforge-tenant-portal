@@ -53,7 +53,7 @@ class FluxLayoutTests(unittest.TestCase):
         return [obj for obj in yaml.safe_load_all(output) if obj]
 
     def test_roots_remain_app_only_suspended_and_disabled(self):
-        for cluster in ("local", "dev", "dev-secondary"):
+        for cluster in ("local", "dev-il2", "dev-il5"):
             with self.subTest(cluster=cluster):
                 objects = self.build(cluster)
                 self.assertEqual({obj["kind"] for obj in objects},
@@ -68,8 +68,8 @@ class FluxLayoutTests(unittest.TestCase):
                 self.assertEqual(self.render(objects), [])
 
     def test_two_dev_clusters_share_environment_with_last_cluster_override(self):
-        origins = {"dev": "https://portal.dev-one.example.invalid",
-                   "dev-secondary": "https://portal.dev-two.example.invalid"}
+        origins = {"dev-il2": "https://portal.dev-il2.example.invalid",
+                   "dev-il5": "https://portal.dev-il5.example.invalid"}
         for cluster, origin in origins.items():
             with self.subTest(cluster=cluster):
                 objects = self.render(self.build(cluster), enabled=True)
@@ -81,7 +81,7 @@ class FluxLayoutTests(unittest.TestCase):
                                  "https://identity.dev.example.invalid")
                 self.assertEqual(env["OIDC_CLIENT_ID"]["value"], "example-dev-client")
                 self.assertEqual(env["OIDC_AUDIENCE"]["value"],
-                                 "example-portal-" + ("il2" if cluster == "dev" else "il5"))
+                                 "example-portal-" + ("il2" if cluster == "dev-il2" else "il5"))
                 self.assertEqual(env["OIDC_CLIENT_SECRET"]["valueFrom"]["secretKeyRef"]["name"],
                                  "portal-oidc-existing")
                 self.assertEqual(pod["serviceAccountName"], "portal-runtime")
@@ -91,7 +91,7 @@ class FluxLayoutTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             tree = Path(directory) / "gitops"
             shutil.copytree(ROOT / "gitops", tree)
-            shutil.copytree(tree / "clusters/dev-secondary", tree / "clusters/team-dev")
+            shutil.copytree(tree / "clusters/dev-il5", tree / "clusters/team-dev")
             selection = tree / "clusters/team-dev/kustomization.yaml"
             data = yaml.safe_load(selection.read_text())
             data["commonAnnotations"]["example.perkforge.io/cluster"] = "team-dev"
@@ -108,7 +108,7 @@ class FluxLayoutTests(unittest.TestCase):
 
     def test_enablement_without_an_approved_digest_fails_closed(self):
         with self.assertRaises(subprocess.CalledProcessError) as error:
-            self.render(self.build("dev"), enabled=True, digest=False)
+            self.render(self.build("dev-il2"), enabled=True, digest=False)
         self.assertIn("immutable image digest", error.exception.output)
 
     def test_mismatched_environment_profile_or_cluster_is_rejected(self):
@@ -116,9 +116,9 @@ class FluxLayoutTests(unittest.TestCase):
             with self.subTest(kind=kind), tempfile.TemporaryDirectory() as directory:
                 tree = Path(directory) / "gitops"
                 shutil.copytree(ROOT / "gitops", tree)
-                selection = tree / "clusters/dev/kustomization.yaml"
+                selection = tree / "clusters/dev-il2/kustomization.yaml"
                 root = yaml.safe_load(selection.read_text())
                 root["commonAnnotations"]["example.perkforge.io/" + kind] = wrong
                 selection.write_text(yaml.safe_dump(root, sort_keys=False))
                 with self.assertRaises(AssertionError):
-                    self.build("dev", tree)
+                    self.build("dev-il2", tree)
