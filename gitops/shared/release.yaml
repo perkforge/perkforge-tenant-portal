@@ -17,5 +17,11 @@ spec:
         name: tenant-portal # Platform-owned source in the release namespace.
   valuesFrom:
   - kind: ConfigMap
-    name: portal-app-values
+    name: portal-defaults
+    valuesKey: values.yaml
+  - kind: ConfigMap
+    name: portal-environment
+    valuesKey: values.yaml
+  - kind: ConfigMap
+    name: portal-cluster
     valuesKey: values.yaml

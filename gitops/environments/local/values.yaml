@@ -1,0 +1,6 @@
+# Illustrative app endpoints only; no live identity/client registration is implied.
+portalOrigin: https://portal.local.example.invalid
+identity:
+  issuer: https://identity.local.example.invalid
+  clientId: example-local-client
+  audience: example-portal
