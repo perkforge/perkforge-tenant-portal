@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../shared
+- ../../environments/dev
+- ../../profiles/il2
+configMapGenerator:
+- name: portal-cluster
+  files:
+  - values.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+commonAnnotations:
+  example.perkforge.io/cluster: dev
+  example.perkforge.io/environment: dev
+  example.perkforge.io/profile: il2

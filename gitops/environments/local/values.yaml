@@ -1,0 +1,3 @@
+# Example client name only; endpoints belong to the named cluster.
+identity:
+  clientId: example-local-client

@@ -1,0 +1,8 @@
+# Disabled app inputs, independent of the currently activated Fleet bundle values.
+enabled: false
+imagePullSecrets:
+- name: portal-registry-existing # Name only; not provisioned by this repository.
+identity:
+  existingSecret: portal-oidc-existing # Name only; no client-secret value in Git.
+serviceAccount:
+  name: portal-runtime # Existing unprivileged account, supplied by the platform.
