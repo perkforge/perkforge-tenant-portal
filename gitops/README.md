@@ -40,7 +40,8 @@ policy or malformed settings fail closed. Local pins the published v0.3.0 image
 digest verified from the successful source/version registry push records. GHCR
 remains private: `portal-registry-existing` needs separately approved read-only
 pull credentials. Anonymous pulls were refused; no credential is provisioned here.
-The app stays disabled pending the remaining enrollment/identity/security approval.
+Only the local activation selection is enabled; deployment still requires the
+remaining enrollment/identity/security approval.
 ConfigMaps and HelmRelease are applied in `tenant-portal-config`, while the release
 targets `tenant-portal` and stores history in `tenant-portal-release`. Runtime never
 mounts deployer/reconciler tokens. Platform enrollment owns those boundaries.
@@ -89,3 +90,16 @@ precedence, shared dev reuse, mismatch rejection and missing-digest rejection.
 No generated YAML is committed. Live capacity, credentials, OIDC/RBAC/admission,
 network/TLS, tenant denials, controller ownership and recovery remain separate
 approval gates. Fleet and Flux must never own the same workloads.
+
+
+## Local activation selection
+
+Only `clusters/local` now sets `enabled: true` and clears the local HelmRelease's
+suspension. Shared chart/Flux defaults, dev and legacy Fleet inputs are unchanged.
+This tag must be selected only after platform-owned namespaces, scoped identities,
+admission/network controls, portal client/TLS/CA and private GHCR pull Secret are
+approved and verified. Publishing this branch/tag does not deploy: the current live
+root selects platform v0.5.2 `local-identity`, with no tenant-app source enrolled.
+Enrollment and platform must subsequently select actual released activation tags;
+never substitute branch refs or future tag names. Live activation requires separate
+approval. Pause the owning reconciliation chain before scaling portal for containment.

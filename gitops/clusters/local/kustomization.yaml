@@ -23,3 +23,8 @@ patches:
     - op: replace
       path: /spec/storageNamespace
       value: tenant-portal-release
+- target: {kind: HelmRelease, name: portal}
+  patch: |-
+    - op: replace
+      path: /spec/suspend
+      value: false

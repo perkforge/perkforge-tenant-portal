@@ -56,20 +56,34 @@ class FluxLayoutTests(unittest.TestCase):
             output = subprocess.check_output(args, text=True, stderr=subprocess.STDOUT)
         return [obj for obj in yaml.safe_load_all(output) if obj]
 
-    def test_roots_remain_app_only_suspended_and_disabled(self):
+    def test_only_local_is_active_and_roots_remain_app_only(self):
         for cluster in ("local", "dev"):
             with self.subTest(cluster=cluster):
                 objects = self.build(cluster)
                 self.assertEqual({obj["kind"] for obj in objects},
                                  {"ConfigMap", "HelmRelease"})
                 release = next(obj for obj in objects if obj["kind"] == "HelmRelease")
-                self.assertTrue(release["spec"]["suspend"])
+                self.assertEqual(release["spec"]["suspend"], cluster != "local")
                 self.assertEqual(release["spec"]["serviceAccountName"], "portal-deployer")
                 self.assertEqual(release["spec"]["chart"]["spec"]["sourceRef"]["name"],
                                  "tenant-portal")
                 self.assertEqual([ref["name"] for ref in release["spec"]["valuesFrom"]],
                                  ["portal-defaults", "portal-environment", "portal-profile", "portal-cluster"])
-                self.assertEqual(self.render(objects), [])
+                if cluster == 'local':
+                    rendered = self.render(objects)
+                    self.assertEqual({o['kind'] for o in rendered}, {'Deployment', 'Service'})
+                    deployment = next(o for o in rendered if o['kind'] == 'Deployment')
+                    self.assertEqual(deployment['spec']['template']['spec']['containers'][0]['image'],
+                        'ghcr.io/perkforge/perkforge-portal@sha256:ae13143108562e9753eab40650cfcef4b53d8336e733adc6a94dbccabc0a2616')
+                else:
+                    self.assertEqual(self.render(objects), [])
+
+    def test_shared_and_dev_safety_defaults_are_preserved(self):
+        self.assertFalse(yaml.safe_load((ROOT/'gitops/shared/values.yaml').read_text())['enabled'])
+        self.assertTrue(yaml.safe_load((ROOT/'gitops/shared/release.yaml').read_text())['spec']['suspend'])
+        self.assertFalse(yaml.safe_load((ROOT/'bundles/portal/chart/values.yaml').read_text())['enabled'])
+        self.assertEqual(self.render(self.build('dev')), [])
+        self.assertEqual(yaml.safe_load((ROOT/'bundles/portal/chart/values.yaml').read_text())['accessPolicy'], 'home')
 
     def test_cluster_hosts_and_identity_follow_ordered_values(self):
         for cluster in ("local", "dev"):
