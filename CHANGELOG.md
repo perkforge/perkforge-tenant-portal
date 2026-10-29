@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v0.2.0...v0.3.0) (2026-10-29)
+
+
+### Features
+
+* **portal:** select local activation explicitly ([#10](https://github.com/perkforge/perkforge-tenant-portal/issues/10)) ([a5d3a6f](https://github.com/perkforge/perkforge-tenant-portal/commit/a5d3a6f544d5de7f7927ddbb3c0cd97e611fcda9))
+
 ## [0.2.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v0.1.0...v0.2.0) (2026-10-29)
 
 
