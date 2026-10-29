@@ -1,3 +1,5 @@
+# Activation-only proposal: requires separate review and live approval.
+enabled: true
 # Routing/TLS is platform-owned; this chart creates no ingress.
 portalOrigin: https://portal-local-il2.local-lab.test
 # v0.3.0, verified source/version digest from the successful image publisher.
