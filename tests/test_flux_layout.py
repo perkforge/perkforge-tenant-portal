@@ -40,7 +40,8 @@ class FluxLayoutTests(unittest.TestCase):
         maps = {obj["metadata"]["name"]: obj for obj in objects
                 if obj["kind"] == "ConfigMap"}
         with tempfile.TemporaryDirectory() as directory:
-            args = ["helm", "template", "portal", str(ROOT / "bundles/portal/chart")]
+            args = ["helm", "template", "portal", str(ROOT / "bundles/portal/chart"),
+                    "--namespace", release['spec'].get('targetNamespace', 'default')]
             for index, ref in enumerate(release["spec"]["valuesFrom"]):
                 path = Path(directory) / f"values-{index}.yaml"
                 path.write_text(maps[ref["name"]]["data"][ref["valuesKey"]])
@@ -49,6 +50,9 @@ class FluxLayoutTests(unittest.TestCase):
                 args += ["--set", "enabled=true"]
                 if digest:
                     args += ["--set-string", "image.digest=sha256:" + "a" * 64]
+                else:
+                    # Test missing-digest rejection even after local pins a real image.
+                    args += ["--set-string", "image.digest="]
             output = subprocess.check_output(args, text=True, stderr=subprocess.STDOUT)
         return [obj for obj in yaml.safe_load_all(output) if obj]
 
@@ -77,13 +81,24 @@ class FluxLayoutTests(unittest.TestCase):
                 self.assertEqual(env["PORTAL_ORIGIN"]["value"],
                                  f"https://portal-{cluster}-il2.local-lab.test")
                 self.assertEqual(env["OIDC_ISSUER"]["value"],
-                                 f"https://keycloak-{cluster}-il2.local-lab.test/realms/household")
-                self.assertEqual(env["OIDC_CLIENT_ID"]["value"], f"example-{cluster}-client")
-                self.assertEqual(env["OIDC_AUDIENCE"]["value"], "example-portal-il2")
+                                 'https://keycloak-local-il2.local-lab.test/auth/realms/perkforge'
+                                 if cluster == 'local' else 'https://keycloak-dev-il2.local-lab.test/realms/household')
+                self.assertEqual(env["OIDC_CLIENT_ID"]["value"], 'portal-local' if cluster == 'local' else 'example-dev-client')
+                self.assertEqual(env["OIDC_AUDIENCE"]["value"], 'portal-local' if cluster == 'local' else 'example-portal-il2')
+                self.assertEqual(env['PORTAL_ACCESS_POLICY']['value'], 'platform-admins' if cluster == 'local' else 'home')
                 self.assertEqual(env["OIDC_CLIENT_SECRET"]["valueFrom"]["secretKeyRef"]["name"],
                                  "portal-oidc-existing")
                 self.assertEqual(pod["serviceAccountName"], "portal-runtime")
                 self.assertFalse(pod["automountServiceAccountToken"])
+                if cluster == 'local':
+                    release = next(o for o in self.build(cluster) if o['kind'] == 'HelmRelease')
+                    self.assertEqual(release['spec']['targetNamespace'], 'tenant-portal')
+                    self.assertEqual(release['spec']['storageNamespace'], 'tenant-portal-release')
+                    self.assertEqual(next(o for o in objects if o['kind']=='Deployment')['metadata']['namespace'], 'tenant-portal')
+                    self.assertEqual(pod['imagePullSecrets'], [{'name':'portal-registry-existing'}])
+                    self.assertEqual(pod['nodeSelector'], {'kubernetes.io/hostname':'cks-worker'})
+                    self.assertEqual(env['NODE_EXTRA_CA_CERTS']['value'], '/etc/portal/identity-ca/ca.crt')
+                    self.assertEqual(pod['hostAliases'][0]['hostnames'], ['keycloak-local-il2.local-lab.test'])
 
     def test_new_cluster_reuses_dev_without_copying_environment(self):
         with tempfile.TemporaryDirectory() as directory:

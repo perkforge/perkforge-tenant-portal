@@ -16,14 +16,14 @@ clusters/{local,dev}/      # explicit entrypoints and final overrides
 - `clusters/{local,dev}/kustomization.yaml`: explicit shared/environment/profile selection.
 - `clusters/{local,dev}/values.yaml`: per-cluster origin and issuer.
 
-The existing `bundles/portal/chart` (`household-portal` 0.1.0) is referenced, not
+The existing `bundles/portal/chart` (`household-portal` 0.1.1) is referenced, not
 copied. Legacy Fleet behavior is unchanged. Helm `valuesFrom` order is
 `portal-defaults` → `portal-environment` → `portal-profile` → `portal-cluster`.
 Later values win; maps merge and lists replace; no inline values hide another layer.
 
 | Target | Environment / profile | Origin | Issuer |
 | --- | --- | --- | --- |
-| local | local / il2 | https://portal-local-il2.local-lab.test | https://keycloak-local-il2.local-lab.test/realms/household |
+| local | local / il2 | https://portal-local-il2.local-lab.test | https://keycloak-local-il2.local-lab.test/auth/realms/perkforge |
 | dev | dev / il2 | https://portal-dev-il2.local-lab.test | https://keycloak-dev-il2.local-lab.test/realms/household |
 
 These are configurable test-host contracts, not configured DNS/TLS or registered
@@ -33,6 +33,17 @@ URI and approved web origin later. The chart consumes `portalOrigin` and
 identity client. Platform enrollment owns routing/TLS and secret provisioning.
 The realm, client names and audience need review, as do the approved image digest
 and existing secret/account references. No live identity changes are included.
+
+Local now proposes explicit `platform-admins` server policy with client/audience
+`portal-local`; Home group defaults stay in `dev`/legacy configuration. Missing
+policy or malformed settings fail closed. Local pins the published v0.3.0 image
+digest verified from the successful source/version registry push records. GHCR
+remains private: `portal-registry-existing` needs separately approved read-only
+pull credentials. Anonymous pulls were refused; no credential is provisioned here.
+The app stays disabled pending the remaining enrollment/identity/security approval.
+ConfigMaps and HelmRelease are applied in `tenant-portal-config`, while the release
+targets `tenant-portal` and stores history in `tenant-portal-release`. Runtime never
+mounts deployer/reconciler tokens. Platform enrollment owns those boundaries.
 
 ## Add or change an input
 

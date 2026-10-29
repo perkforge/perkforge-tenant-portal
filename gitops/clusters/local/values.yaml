@@ -1,4 +1,17 @@
 # Routing/TLS is platform-owned; this chart creates no ingress.
 portalOrigin: https://portal-local-il2.local-lab.test
+# v0.3.0, verified source/version digest from the successful image publisher.
+image:
+  digest: sha256:ae13143108562e9753eab40650cfcef4b53d8336e733adc6a94dbccabc0a2616
 identity:
-  issuer: https://keycloak-local-il2.local-lab.test/realms/household
+  issuer: https://keycloak-local-il2.local-lab.test/auth/realms/perkforge
+  clientId: portal-local
+  audience: portal-local
+  caConfigMap: portal-identity-ca
+  hostAliases:
+  - ip: 192.168.122.201
+    hostnames: [keycloak-local-il2.local-lab.test]
+accessPolicy: platform-admins
+# GHCR remains private. The existing shared portal-registry-existing reference
+# needs separately approved credential delivery; no credential is supplied here.
+nodeSelector: {kubernetes.io/hostname: cks-worker}

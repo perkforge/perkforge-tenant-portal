@@ -8,6 +8,9 @@
 {{- if ne .Values.tenantSource "disabled" }}
 {{- fail "GitLab must remain disabled in this release" }}
 {{- end }}
+{{- if not (has .Values.accessPolicy (list "home" "platform-admins")) }}
+{{- fail "A supported explicit accessPolicy is required" }}
+{{- end }}
 {{- if not (hasPrefix "https://" .Values.identity.issuer) }}
 {{- fail "A reviewed HTTPS identity issuer is required" }}
 {{- end }}
@@ -32,6 +35,10 @@ spec:
     spec:
       serviceAccountName: {{ required "serviceAccount.name must reference an approved existing account" .Values.serviceAccount.name | quote }}
       automountServiceAccountToken: false
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -84,6 +91,8 @@ spec:
           value: {{ .Values.portalOrigin | quote }}
         - name: TENANT_SOURCE
           value: disabled
+        - name: PORTAL_ACCESS_POLICY
+          value: {{ .Values.accessPolicy | quote }}
         - name: OIDC_ISSUER
           value: {{ .Values.identity.issuer | quote }}
         - name: OIDC_CLIENT_ID

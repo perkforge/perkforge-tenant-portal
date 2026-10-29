@@ -4,6 +4,7 @@ image:
   digest: ''
 # Names only: credentials are provisioned externally in the release namespace.
 imagePullSecrets: []
+nodeSelector: {}
 portalOrigin: ''
 identity:
   caConfigMap: ""
@@ -14,6 +15,7 @@ identity:
   existingSecret: ''
 # This release intentionally supports disabled GitLab only.
 tenantSource: disabled
+accessPolicy: home
 # This chart references an existing account; it never creates RBAC or service accounts.
 serviceAccount:
   name: ''
