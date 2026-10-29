@@ -14,3 +14,12 @@ commonAnnotations:
   example.perkforge.io/cluster: local
   example.perkforge.io/environment: local
   example.perkforge.io/profile: il2
+patches:
+- target: {kind: HelmRelease, name: portal}
+  patch: |-
+    - op: add
+      path: /spec/targetNamespace
+      value: tenant-portal
+    - op: replace
+      path: /spec/storageNamespace
+      value: tenant-portal-release

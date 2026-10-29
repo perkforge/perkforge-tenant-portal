@@ -67,10 +67,19 @@ class ChartTests(unittest.TestCase):
         self.assertEqual(container['securityContext']['capabilities']['drop'], ['ALL'])
         env = {x['name']: x for x in container['env']}
         self.assertEqual(env['TENANT_SOURCE']['value'], 'disabled')
+        self.assertEqual(env['PORTAL_ACCESS_POLICY']['value'], 'home')
         self.assertIn('secretKeyRef', env['OIDC_CLIENT_SECRET']['valueFrom'])
         self.assertEqual(container['resources']['limits']['memory'], '192Mi')
         service = next(o for o in objects if o['kind']=='Service')
         self.assertEqual(service['spec']['type'], 'ClusterIP')
+
+    def test_platform_admin_policy_is_explicit_and_unknown_policy_fails_closed(self):
+        result = self.enabled('--set', 'accessPolicy=platform-admins')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        dep = next(o for o in yaml.safe_load_all(result.stdout) if o['kind']=='Deployment')
+        env = {e['name']:e for e in dep['spec']['template']['spec']['containers'][0]['env']}
+        self.assertEqual(env['PORTAL_ACCESS_POLICY']['value'], 'platform-admins')
+        self.assertNotEqual(self.enabled('--set', 'accessPolicy=all').returncode, 0)
 
     def test_application_has_no_platform_transport_or_routing_dependency(self):
         fleet = yaml.safe_load((ROOT / 'bundles/portal/fleet.yaml').read_text())

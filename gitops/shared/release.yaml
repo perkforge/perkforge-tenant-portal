@@ -11,7 +11,8 @@ spec:
   storageNamespace: tenant-example-portal-release
   chart:
     spec:
-      chart: ./bundles/portal/chart # household-portal 0.1.0, in this same repository.
+      chart: ./bundles/portal/chart # household-portal 0.1.1, in this same repository.
+      reconcileStrategy: Revision
       sourceRef:
         kind: GitRepository
         name: tenant-portal # Platform-owned source in the release namespace.
