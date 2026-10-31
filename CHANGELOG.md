@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v0.3.0...v1.0.0) (2026-10-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **gitops:** cluster, environment and profile annotations now use platform.perkforge.io instead of the former illustrative namespace. Enrollment consumers require a compatible release before advancing their pin.
+
+### Bug Fixes
+
+* **gitops:** migrate selection annotations to platform namespace ([#12](https://github.com/perkforge/perkforge-tenant-portal/issues/12)) ([d3e72ff](https://github.com/perkforge/perkforge-tenant-portal/commit/d3e72ff9301466bbb16ac7d0e4130f5340a6e010))
+
 ## [0.3.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v0.2.0...v0.3.0) (2026-10-29)
 
 
