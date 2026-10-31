@@ -30,7 +30,7 @@ class FluxLayoutTests(unittest.TestCase):
     def check_selection(self, path, cluster):
         root = yaml.safe_load((path / "kustomization.yaml").read_text())
         context = root["commonAnnotations"]
-        prefix = "example.perkforge.io/"
+        prefix = "platform.perkforge.io/"
         self.assertEqual(context[prefix + "cluster"], cluster)
         self.assertIn("../../environments/" + context[prefix + "environment"], root["resources"])
         self.assertIn("../../profiles/" + context[prefix + "profile"], root["resources"])
@@ -121,7 +121,7 @@ class FluxLayoutTests(unittest.TestCase):
             shutil.copytree(tree / "clusters/dev", tree / "clusters/team-dev")
             selection = tree / "clusters/team-dev/kustomization.yaml"
             data = yaml.safe_load(selection.read_text())
-            data["commonAnnotations"]["example.perkforge.io/cluster"] = "team-dev"
+            data["commonAnnotations"]["platform.perkforge.io/cluster"] = "team-dev"
             selection.write_text(yaml.safe_dump(data, sort_keys=False))
             (tree / "clusters/team-dev/values.yaml").write_text(
                 "portalOrigin: https://portal-team-dev-il2.local-lab.test\n"
@@ -146,7 +146,7 @@ class FluxLayoutTests(unittest.TestCase):
                 shutil.copytree(ROOT / "gitops", tree)
                 selection = tree / "clusters/dev/kustomization.yaml"
                 root = yaml.safe_load(selection.read_text())
-                root["commonAnnotations"]["example.perkforge.io/" + kind] = wrong
+                root["commonAnnotations"]["platform.perkforge.io/" + kind] = wrong
                 selection.write_text(yaml.safe_dump(root, sort_keys=False))
                 with self.assertRaises(AssertionError):
                     self.build("dev", tree)

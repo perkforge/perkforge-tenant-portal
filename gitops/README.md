@@ -103,3 +103,5 @@ root selects platform v0.5.2 `local-identity`, with no tenant-app source enrolle
 Enrollment and platform must subsequently select actual released activation tags;
 never substitute branch refs or future tag names. Live activation requires separate
 approval. Pause the owning reconciliation chain before scaling portal for containment.
+
+Selection annotations use `platform.perkforge.io/cluster`, `/environment` and `/profile`. Consumers must select a compatible published configuration release; older releases are not rewritten. This metadata change does not enable the application or grant platform authority.
