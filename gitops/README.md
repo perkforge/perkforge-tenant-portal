@@ -3,6 +3,9 @@
 Start at `clusters/local/kustomization.yaml` or `clusters/dev/kustomization.yaml`.
 Local now means the physical home platform; dev remains an inactive example. Both select il2.
 Published v1.0.0 and legacy Fleet inputs retain their historical VM meaning.
+This is a breaking configuration contract: local endpoints, placement and activation
+state change. Consumers must coordinate compatible releases rather than treat it as
+a drop-in v1 patch; preserve the breaking classification when squash-merging.
 Cluster identity, environment and profile remain independent inputs.
 
 ```text
