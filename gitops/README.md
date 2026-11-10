@@ -1,7 +1,8 @@
 # Paused portal: shared → environment → profile → cluster
 
 Start at `clusters/local/kustomization.yaml` or `clusters/dev/kustomization.yaml`.
-Local means local VMs; dev means the future physical cluster. Both select il2.
+Local now means the physical home platform; dev remains an inactive example. Both select il2.
+Published v1.0.0 and legacy Fleet inputs retain their historical VM meaning.
 Cluster identity, environment and profile remain independent inputs.
 
 ```text
@@ -23,7 +24,7 @@ Later values win; maps merge and lists replace; no inline values hide another la
 
 | Target | Environment / profile | Origin | Issuer |
 | --- | --- | --- | --- |
-| local | local / il2 | https://portal-local-il2.local-lab.test | https://keycloak-local-il2.local-lab.test/auth/realms/perkforge |
+| local | local / il2 | https://portal.perkforge.home.arpa | https://keycloak.perkforge.home.arpa/auth/realms/perkforge |
 | dev | dev / il2 | https://portal-dev-il2.local-lab.test | https://keycloak-dev-il2.local-lab.test/realms/household |
 
 These are configurable test-host contracts, not configured DNS/TLS or registered
@@ -40,8 +41,7 @@ policy or malformed settings fail closed. Local pins the published v0.3.0 image
 digest verified from the successful source/version registry push records. GHCR
 remains private: `portal-registry-existing` needs separately approved read-only
 pull credentials. Anonymous pulls were refused; no credential is provisioned here.
-Only the local activation selection is enabled; deployment still requires the
-remaining enrollment/identity/security approval.
+All Flux selections remain disabled/suspended until separate activation approval.
 ConfigMaps and HelmRelease are applied in `tenant-portal-config`, while the release
 targets `tenant-portal` and stores history in `tenant-portal-release`. Runtime never
 mounts deployer/reconciler tokens. Platform enrollment owns those boundaries.
@@ -70,10 +70,8 @@ Namespace, ServiceAccount, RBAC, policy, Secret or Big Bang configuration.
 must fail closed; no broad fallback is allowed. Foundation/admission must constrain
 identities, namespaces, sources, secrets and images before activation.
 
-Merge [app #5](https://github.com/perkforge/perkforge-tenant-portal/pull/5) first;
-pause to advance/revalidate the app commit in [enrollment #1](https://github.com/perkforge/perkforge-platform-tenants/pull/1).
-After enrollment merges, pause to advance/revalidate its commit in
-[platform #47](https://github.com/perkforge/perkforge-platform/pull/47).
+Release the reviewed app configuration first, then update and validate the enrollment
+release, then the platform release. Use only actual published immutable release refs.
 Squash/rebase changes SHAs. Review pins are not production refs. Merge never unsuspends.
 
 ## Offline checks
@@ -92,16 +90,26 @@ network/TLS, tenant denials, controller ownership and recovery remain separate
 approval gates. Fleet and Flux must never own the same workloads.
 
 
-## Local activation selection
+## Physical local selection
 
-Only `clusters/local` now sets `enabled: true` and clears the local HelmRelease's
-suspension. Shared chart/Flux defaults, dev and legacy Fleet inputs are unchanged.
-This tag must be selected only after platform-owned namespaces, scoped identities,
-admission/network controls, portal client/TLS/CA and private GHCR pull Secret are
-approved and verified. Publishing this branch/tag does not deploy: the current live
-root selects platform v0.5.2 `local-identity`, with no tenant-app source enrolled.
-Enrollment and platform must subsequently select actual released activation tags;
-never substitute branch refs or future tag names. Live activation requires separate
-approval. Pause the owning reconciliation chain before scaling portal for containment.
+Reuse `clusters/local` to match the physical platform's existing local/environment/il2
+selection. This avoids adding a second competing target. Older released tags are not
+rewritten. This proposal explicitly sets `enabled: false` and inherits suspension;
+shared/dev and legacy Fleet inputs stay unchanged. Publishing it cannot authorize
+activation. Never enroll the historical Fleet bundle on the physical cluster.
+
+The proposed origin is `https://portal.perkforge.home.arpa` and exact callback is
+`https://portal.perkforge.home.arpa/auth/callback`. The issuer is
+`https://keycloak.perkforge.home.arpa/auth/realms/perkforge`; client and audience stay
+`portal-local`, with explicit `platform-admins` policy. Platform-owned DNS must resolve
+Keycloak normally: there is no static VM hostAlias. Worker selection requires
+`storage.perkforge.io/worker=true` and excludes both control-plane/master role labels;
+no tolerations permit control-plane scheduling. Verify worker labels before activation.
+
+One stateless Recreate replica keeps requests 25m/64Mi and limits 250m/192Mi.
+Runtime, Helm control and history namespaces remain `tenant-portal`,
+`tenant-portal-config` and `tenant-portal-release`. No credentials, identity clients,
+TLS ingress, security controls or runtime authorities are created here.
+See [physical approval gates](../docs/operations.md#physical-restore-approval-gates).
 
 Selection annotations use `platform.perkforge.io/cluster`, `/environment` and `/profile`. Consumers must select a compatible published configuration release; older releases are not rewritten. This metadata change does not enable the application or grant platform authority.

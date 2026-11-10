@@ -1,3 +1,49 @@
+# Physical restore approval gates
+
+The current source proposal for [Portal #12](https://github.com/perkforge/perkforge-portal/issues/12)
+uses `gitops/clusters/local` for the physical platform, disabled and suspended.
+It pins the existing v0.3.0 image digest
+`sha256:ae13143108562e9753eab40650cfcef4b53d8336e733adc6a94dbccabc0a2616`.
+It does not deploy, release, create credentials, or redesign the application.
+
+Before a separately reviewed activation:
+
+1. Publish and verify the app config release, then coordinate exact enrollment and
+   platform release pins. Keep the ownership chain paused while preparing prerequisites.
+2. Enrollment must supply scoped namespaces/accounts, admission and network policy,
+   private GHCR pull Secret `portal-registry-existing`, OIDC Secret
+   `portal-oidc-existing`, and public CA ConfigMap `portal-identity-ca`. Verify image
+   admission and authenticated pull without exposing credentials.
+3. Approve DNS/TLS/ingress for `portal.perkforge.home.arpa`, resolve Keycloak from
+   tenant pods without hostAliases, and trust its public CA with TLS verification on.
+   Register exact callback `https://portal.perkforge.home.arpa/auth/callback` and web
+   origin `https://portal.perkforge.home.arpa` on confidential client `portal-local`.
+   Preserve audience `portal-local` and the reviewed `platform-admins` server policy.
+4. Verify physical worker labels/capacity and negative scheduling/security cases.
+   The chart requires the worker label and excludes control-plane/master labels.
+   Budget remains one Recreate replica, requests 25m/64Mi, limits 250m/192Mi.
+5. Obtain separate approval to enable/unsuspend through reviewed released Git, then
+   test health, TLS, intended admin login, unauthorized denial, logout/session behavior
+   and runtime isolation. Offline renders do not prove these live acceptance gates.
+
+Rollback/containment: pause the owning reconciliation chain first; use reviewed Git
+pins and explicit enable/suspend settings. Do not roll back to VM endpoints or infer
+permission to delete namespaces/secrets. A restart signs users out; Portal has no
+persistent storage. Nextcloud and its transfer/configuration are outside this change.
+CI/workflow settings remain unchanged. Run local checks even when hosted CI is paused:
+
+```sh
+helm lint bundles/portal/chart
+python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s scripts -p 'test_*.py' -v
+```
+
+## Historical VM/Fleet operations (not physical deployment instructions)
+
+The following records describe older VM/Fleet releases only. Do not use their image,
+identity, host mappings, namespace, credential names or activation state for physical
+restoration; the physical contract above and `gitops/README.md` take precedence.
+
 # Inactive preview and approval gates
 
 No deployment exists from this change. The application values pin the Actions-published

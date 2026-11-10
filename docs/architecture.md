@@ -1,3 +1,19 @@
+# Physical deployment ownership
+
+The active physical path is Big Bang/Flux through `gitops/clusters/local`; see
+[the composition contract](../gitops/README.md). Application source remains in
+`perkforge-portal`; this repository owns only namespaced Deployment/Service and app
+values/HelmRelease. `perkforge-platform-tenants` owns enrollment and scoped controls,
+while `perkforge-platform` selects the protected enrollment release. TLS/identity,
+credentials and platform authority are not supplied by application configuration.
+The physical restore is admin-only baseline work, separate from future AI-driven UI
+and tenant guidance/security-review architecture features.
+
+## Historical ownership and runtime notes
+
+The Fleet/Home references below describe the VM deployment, not the physical path.
+The stateless hardened runtime and application/platform separation remain applicable.
+
 # Repository ownership
 
 - `perkforge-portal`: React/Node source, authentication, API, tests and image build.

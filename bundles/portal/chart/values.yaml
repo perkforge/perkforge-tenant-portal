@@ -5,6 +5,7 @@ image:
 # Names only: credentials are provisioned externally in the release namespace.
 imagePullSecrets: []
 nodeSelector: {}
+affinity: {}
 portalOrigin: ''
 identity:
   caConfigMap: ""
