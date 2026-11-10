@@ -50,27 +50,28 @@ class FluxLayoutTests(unittest.TestCase):
                 args += ["--set", "enabled=true"]
                 if digest:
                     args += ["--set-string", "image.digest=sha256:" + "a" * 64]
-                else:
+                elif digest is False:
                     # Test missing-digest rejection even after local pins a real image.
                     args += ["--set-string", "image.digest="]
             output = subprocess.check_output(args, text=True, stderr=subprocess.STDOUT)
         return [obj for obj in yaml.safe_load_all(output) if obj]
 
-    def test_only_local_is_active_and_roots_remain_app_only(self):
+    def test_all_roots_are_paused_and_remain_app_only(self):
         for cluster in ("local", "dev"):
             with self.subTest(cluster=cluster):
                 objects = self.build(cluster)
                 self.assertEqual({obj["kind"] for obj in objects},
                                  {"ConfigMap", "HelmRelease"})
                 release = next(obj for obj in objects if obj["kind"] == "HelmRelease")
-                self.assertEqual(release["spec"]["suspend"], cluster != "local")
+                self.assertTrue(release["spec"]["suspend"])
                 self.assertEqual(release["spec"]["serviceAccountName"], "portal-deployer")
                 self.assertEqual(release["spec"]["chart"]["spec"]["sourceRef"]["name"],
                                  "tenant-portal")
                 self.assertEqual([ref["name"] for ref in release["spec"]["valuesFrom"]],
                                  ["portal-defaults", "portal-environment", "portal-profile", "portal-cluster"])
+                self.assertEqual(self.render(objects), [])
                 if cluster == 'local':
-                    rendered = self.render(objects)
+                    rendered = self.render(objects, enabled=True, digest=None)
                     self.assertEqual({o['kind'] for o in rendered}, {'Deployment', 'Service'})
                     deployment = next(o for o in rendered if o['kind'] == 'Deployment')
                     self.assertEqual(deployment['spec']['template']['spec']['containers'][0]['image'],
@@ -93,9 +94,9 @@ class FluxLayoutTests(unittest.TestCase):
                 pod = next(obj for obj in objects if obj["kind"] == "Deployment")["spec"]["template"]["spec"]
                 env = {item["name"]: item for item in pod["containers"][0]["env"]}
                 self.assertEqual(env["PORTAL_ORIGIN"]["value"],
-                                 f"https://portal-{cluster}-il2.local-lab.test")
+                                 "https://portal.perkforge.home.arpa" if cluster == "local" else "https://portal-dev-il2.local-lab.test")
                 self.assertEqual(env["OIDC_ISSUER"]["value"],
-                                 'https://keycloak-local-il2.local-lab.test/auth/realms/perkforge'
+                                 'https://keycloak.perkforge.home.arpa/auth/realms/perkforge'
                                  if cluster == 'local' else 'https://keycloak-dev-il2.local-lab.test/realms/household')
                 self.assertEqual(env["OIDC_CLIENT_ID"]["value"], 'portal-local' if cluster == 'local' else 'example-dev-client')
                 self.assertEqual(env["OIDC_AUDIENCE"]["value"], 'portal-local' if cluster == 'local' else 'example-portal-il2')
@@ -110,9 +111,43 @@ class FluxLayoutTests(unittest.TestCase):
                     self.assertEqual(release['spec']['storageNamespace'], 'tenant-portal-release')
                     self.assertEqual(next(o for o in objects if o['kind']=='Deployment')['metadata']['namespace'], 'tenant-portal')
                     self.assertEqual(pod['imagePullSecrets'], [{'name':'portal-registry-existing'}])
-                    self.assertEqual(pod['nodeSelector'], {'kubernetes.io/hostname':'cks-worker'})
+                    self.assertEqual(pod['nodeSelector'], {'storage.perkforge.io/worker':'true'})
                     self.assertEqual(env['NODE_EXTRA_CA_CERTS']['value'], '/etc/portal/identity-ca/ca.crt')
-                    self.assertEqual(pod['hostAliases'][0]['hostnames'], ['keycloak-local-il2.local-lab.test'])
+                    self.assertNotIn('hostAliases', pod)
+                    self.assertNotIn('tolerations', pod)
+                    terms = pod['affinity']['nodeAffinity']['requiredDuringSchedulingIgnoredDuringExecution']['nodeSelectorTerms']
+                    self.assertEqual(terms, [{'matchExpressions': [
+                        {'key': 'node-role.kubernetes.io/control-plane', 'operator': 'DoesNotExist'},
+                        {'key': 'node-role.kubernetes.io/master', 'operator': 'DoesNotExist'},
+                    ]}])
+                    deployment = next(o for o in objects if o['kind'] == 'Deployment')
+                    self.assertEqual(deployment['spec']['replicas'], 1)
+                    self.assertEqual(deployment['spec']['strategy'], {'type': 'Recreate'})
+                    self.assertEqual(pod['containers'][0]['resources'], {
+                        'requests': {'cpu': '25m', 'memory': '64Mi'},
+                        'limits': {'cpu': '250m', 'memory': '192Mi'},
+                    })
+                    self.assertEqual([v['name'] for v in pod['volumes']], ['identity-ca'])
+
+    def test_physical_placement_requires_worker_and_excludes_control_plane(self):
+        deployment = next(o for o in self.render(self.build('local'), enabled=True)
+                          if o['kind'] == 'Deployment')
+        pod = deployment['spec']['template']['spec']
+        terms = pod['affinity']['nodeAffinity']['requiredDuringSchedulingIgnoredDuringExecution']['nodeSelectorTerms']
+        # Evaluate the rendered selector/DoesNotExist contract, not a live scheduler.
+        def matches(labels):
+            return (all(labels.get(key) == value for key, value in pod['nodeSelector'].items())
+                    and any(all(expression['operator'] == 'DoesNotExist'
+                                and expression['key'] not in labels
+                                for expression in term['matchExpressions']) for term in terms))
+        for hostname in ('worker-1', 'worker-2'):
+            self.assertTrue(matches({'kubernetes.io/hostname': hostname,
+                                     'storage.perkforge.io/worker': 'true'}))
+        for labels in ({}, {'storage.perkforge.io/worker': 'false'},
+                       {'storage.perkforge.io/worker': 'true', 'node-role.kubernetes.io/control-plane': ''},
+                       {'storage.perkforge.io/worker': 'true', 'node-role.kubernetes.io/master': ''}):
+            with self.subTest(labels=labels):
+                self.assertFalse(matches(labels))
 
     def test_new_cluster_reuses_dev_without_copying_environment(self):
         with tempfile.TemporaryDirectory() as directory:
