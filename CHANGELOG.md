@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v1.0.0...v2.0.0) (2026-11-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **gitops:** local now targets the physical platform with new origin, issuer and worker placement, and is disabled/suspended. Enrollment and platform consumers require coordinated compatible releases and separate activation approval.
+
+### Bug Fixes
+
+* **gitops:** prepare paused physical Portal configuration ([#15](https://github.com/perkforge/perkforge-tenant-portal/issues/15)) ([a10def7](https://github.com/perkforge/perkforge-tenant-portal/commit/a10def7fcb13589853d46162fdf6bddbb7f5a4cb))
+
 ## [1.0.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v0.3.0...v1.0.0) (2026-10-31)
 
 
