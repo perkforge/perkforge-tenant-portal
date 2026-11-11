@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.0.0...v2.1.0) (2026-11-11)
+
+
+### Features
+
+* prepare physical Portal app activation ([#17](https://github.com/perkforge/perkforge-tenant-portal/issues/17)) ([f4bf6e1](https://github.com/perkforge/perkforge-tenant-portal/commit/f4bf6e1a75781372bde8253bd2249285bf626138))
+
 ## [2.0.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v1.0.0...v2.0.0) (2026-11-10)
 
 
