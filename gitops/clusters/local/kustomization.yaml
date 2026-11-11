@@ -17,6 +17,9 @@ commonAnnotations:
 patches:
 - target: {kind: HelmRelease, name: portal}
   patch: |-
+    - op: replace
+      path: /spec/suspend
+      value: false
     - op: add
       path: /spec/targetNamespace
       value: tenant-portal

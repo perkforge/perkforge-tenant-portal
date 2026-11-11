@@ -1,12 +1,14 @@
 # Physical restore approval gates
 
 The current source proposal for [Portal #12](https://github.com/perkforge/perkforge-portal/issues/12)
-uses `gitops/clusters/local` for the physical platform, disabled and suspended.
+uses `gitops/clusters/local` for an enabled physical source release candidate.
+Only its local HelmRelease is unsuspended. Independent enrollment still pins
+disabled v2.0.0 and remains suspended; no deployment is implied.
 It pins the existing v0.3.0 image digest
 `sha256:ae13143108562e9753eab40650cfcef4b53d8336e733adc6a94dbccabc0a2616`.
 It does not deploy, release, create credentials, or redesign the application.
 
-Before a separately reviewed activation:
+Before enrolling this activation candidate:
 
 1. Publish and verify the app config release, then coordinate exact enrollment and
    platform release pins. Keep the ownership chain paused while preparing prerequisites.
@@ -22,7 +24,9 @@ Before a separately reviewed activation:
 4. Verify physical worker labels/capacity and negative scheduling/security cases.
    The chart requires the worker label and excludes control-plane/master labels.
    Budget remains one Recreate replica, requests 25m/64Mi, limits 250m/192Mi.
-5. Obtain separate approval to enable/unsuspend through reviewed released Git, then
+5. Review and publish the app configuration, then coordinate the released enrollment
+   pin and unpause through the approved Git rollout. No credentials, ESO readiness,
+   DNS or live capacity are presumed by this source change. Then
    test health, TLS, intended admin login, unauthorized denial, logout/session behavior
    and runtime isolation. Offline renders do not prove these live acceptance gates.
 
