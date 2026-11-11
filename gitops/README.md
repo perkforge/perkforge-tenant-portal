@@ -1,4 +1,4 @@
-# Paused portal: shared → environment → profile → cluster
+# Portal: shared → environment → profile → cluster
 
 Start at `clusters/local/kustomization.yaml` or `clusters/dev/kustomization.yaml`.
 Local now means the physical home platform; dev remains an inactive example. Both select il2.
@@ -44,7 +44,9 @@ policy or malformed settings fail closed. Local pins the published v0.3.0 image
 digest verified from the successful source/version registry push records. GHCR
 remains private: `portal-registry-existing` needs separately approved read-only
 pull credentials. Anonymous pulls were refused; no credential is provisioned here.
-All Flux selections remain disabled/suspended until separate activation approval.
+Local is enabled and its HelmRelease unsuspended in this source candidate only.
+Shared/dev remain disabled/suspended. Independent enrollment still pins disabled
+v2.0.0 and is suspended; publishing this configuration alone does not deploy it.
 ConfigMaps and HelmRelease are applied in `tenant-portal-config`, while the release
 targets `tenant-portal` and stores history in `tenant-portal-release`. Runtime never
 mounts deployer/reconciler tokens. Platform enrollment owns those boundaries.
@@ -66,7 +68,7 @@ against protected platform/enrollment Git at exact pins; they do not enforce sec
 ## Ownership and review order
 
 Platform-owned `perkforge-platform-tenants` enrolls this source under scoped
-identities. This app Git creates only ConfigMaps and a paused HelmRelease: no
+identities. This app Git creates only ConfigMaps and a HelmRelease: no
 Namespace, ServiceAccount, RBAC, policy, Secret or Big Bang configuration.
 `portal-deployer`, `portal-runtime`, isolated Helm storage and parent
 `portal-reconciler` are unprovisioned reviewed contracts. Missing prerequisites
@@ -75,7 +77,7 @@ identities, namespaces, sources, secrets and images before activation.
 
 Release the reviewed app configuration first, then update and validate the enrollment
 release, then the platform release. Use only actual published immutable release refs.
-Squash/rebase changes SHAs. Review pins are not production refs. Merge never unsuspends.
+Squash/rebase changes SHAs. Review pins are not production refs. App-config merge does not repin or unsuspend independent enrollment.
 
 ## Offline checks
 
@@ -85,8 +87,9 @@ kubectl kustomize gitops/clusters/dev > /tmp/portal-dev.yaml
 python3 -m unittest discover -s tests -v
 ```
 
-Tests render the actual ordered ConfigMaps through the existing chart. Disabled
-renders emit no workloads. Synthetic enabled renders check origins/issuers,
+Tests render the actual ordered ConfigMaps through the existing chart. Shared/dev disabled
+renders emit no workloads. The actual local candidate renders the pinned workload
+without enablement or digest overrides. Synthetic enabled renders check origins/issuers,
 precedence, shared dev reuse, mismatch rejection and missing-digest rejection.
 No generated YAML is committed. Live capacity, credentials, OIDC/RBAC/admission,
 network/TLS, tenant denials, controller ownership and recovery remain separate
@@ -97,9 +100,10 @@ approval gates. Fleet and Flux must never own the same workloads.
 
 Reuse `clusters/local` to match the physical platform's existing local/environment/il2
 selection. This avoids adding a second competing target. Older released tags are not
-rewritten. This proposal explicitly sets `enabled: false` and inherits suspension;
-shared/dev and legacy Fleet inputs stay unchanged. Publishing it cannot authorize
-activation. Never enroll the historical Fleet bundle on the physical cluster.
+rewritten. This release candidate explicitly sets `enabled: true` and overrides only the local
+HelmRelease to `suspend: false`; shared/dev and legacy Fleet inputs stay unchanged.
+Publishing it does not repin or unsuspend enrollment. A future released enrollment
+pin/unpause can deploy it, so verify all physical prerequisites first. Never enroll the historical Fleet bundle on the physical cluster.
 
 The proposed origin is `https://portal.perkforge.home.arpa` and exact callback is
 `https://portal.perkforge.home.arpa/auth/callback`. The issuer is

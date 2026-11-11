@@ -1,5 +1,5 @@
-# Physical-cluster proposal: activation requires separate review and approval.
-enabled: false
+# Physical activation candidate; enrollment remains independently pinned and suspended.
+enabled: true
 # Routing/TLS is platform-owned; this chart creates no ingress.
 portalOrigin: https://portal.perkforge.home.arpa
 # v0.3.0, verified source/version digest from the successful image publisher.

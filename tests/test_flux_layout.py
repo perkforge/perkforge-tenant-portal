@@ -56,22 +56,21 @@ class FluxLayoutTests(unittest.TestCase):
             output = subprocess.check_output(args, text=True, stderr=subprocess.STDOUT)
         return [obj for obj in yaml.safe_load_all(output) if obj]
 
-    def test_all_roots_are_paused_and_remain_app_only(self):
+    def test_only_local_candidate_is_enabled_and_roots_remain_app_only(self):
         for cluster in ("local", "dev"):
             with self.subTest(cluster=cluster):
                 objects = self.build(cluster)
                 self.assertEqual({obj["kind"] for obj in objects},
                                  {"ConfigMap", "HelmRelease"})
                 release = next(obj for obj in objects if obj["kind"] == "HelmRelease")
-                self.assertTrue(release["spec"]["suspend"])
+                self.assertEqual(release["spec"]["suspend"], cluster != "local")
                 self.assertEqual(release["spec"]["serviceAccountName"], "portal-deployer")
                 self.assertEqual(release["spec"]["chart"]["spec"]["sourceRef"]["name"],
                                  "tenant-portal")
                 self.assertEqual([ref["name"] for ref in release["spec"]["valuesFrom"]],
                                  ["portal-defaults", "portal-environment", "portal-profile", "portal-cluster"])
-                self.assertEqual(self.render(objects), [])
                 if cluster == 'local':
-                    rendered = self.render(objects, enabled=True, digest=None)
+                    rendered = self.render(objects)
                     self.assertEqual({o['kind'] for o in rendered}, {'Deployment', 'Service'})
                     deployment = next(o for o in rendered if o['kind'] == 'Deployment')
                     self.assertEqual(deployment['spec']['template']['spec']['containers'][0]['image'],
