@@ -20,3 +20,12 @@ accessPolicy: home
 # This chart references an existing account; it never creates RBAC or service accounts.
 serviceAccount:
   name: ''
+
+# Generated from reviewed immutable enrollment source; disabled until image and
+# cross-repository source evidence are promoted together. No runtime API access.
+enrollmentInventory:
+  enabled: false
+  sourceCommit: ''
+  selector: ''
+  sha256: ''
+  content: ''
