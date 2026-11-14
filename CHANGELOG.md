@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.1.0...v2.1.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **portal:** pin independent platform admin image ([#19](https://github.com/perkforge/perkforge-tenant-portal/issues/19)) ([6873057](https://github.com/perkforge/perkforge-tenant-portal/commit/68730576a6e9ec021c7a0dda0c743f7c5e6a93a8))
+
 ## [2.1.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.0.0...v2.1.0) (2026-11-11)
 
 
