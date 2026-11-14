@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.4](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.3.3...v2.3.4) (2026-11-14)
+
+
+### Bug Fixes
+
+* pin final scoped logging architecture image ([169174d](https://github.com/perkforge/perkforge-tenant-portal/commit/169174d7e352bf1ce8fcc0ab7dd51686c4d11f91))
+* pin final scoped logging architecture image ([633729f](https://github.com/perkforge/perkforge-tenant-portal/commit/633729fc5c345fbb9905215ddb50ccf33b1f8038))
+
 ## [2.3.3](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.3.2...v2.3.3) (2026-11-14)
 
 
