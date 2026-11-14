@@ -40,13 +40,14 @@ and existing secret/account references. No live identity changes are included.
 
 Local now proposes explicit `platform-admins` server policy with client/audience
 `portal-local`; Home group defaults stay in `dev`/legacy configuration. Missing
-policy or malformed settings fail closed. Local pins the published v0.4.0 image
+policy or malformed settings fail closed. Local pins the published v0.6.0 image
 digest verified from the successful source/version registry push records. GHCR
 remains private: `portal-registry-existing` needs separately approved read-only
 pull credentials. Anonymous pulls were refused; no credential is provisioned here.
-Local is enabled and its HelmRelease unsuspended in this source candidate only.
-Shared/dev remain disabled/suspended. Independent enrollment still pins disabled
-v2.0.0 and is suspended; publishing this configuration alone does not deploy it.
+Local is enabled and its HelmRelease unsuspended. Shared/dev remain disabled/
+suspended. The physical deployment is active; a new image selection still requires
+coordinated exact enrollment/platform release pins. Publishing configuration alone
+does not update the live deployment.
 ConfigMaps and HelmRelease are applied in `tenant-portal-config`, while the release
 targets `tenant-portal` and stores history in `tenant-portal-release`. Runtime never
 mounts deployer/reconciler tokens. Platform enrollment owns those boundaries.

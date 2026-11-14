@@ -4,7 +4,7 @@ enabled: true
 portalOrigin: https://portal.perkforge.home.arpa
 # v0.5.0, verified source/version digest from the successful image publisher.
 image:
-  digest: sha256:eaa66ab13be20079f188f4b5d8c5d79e274612f0f5742a8d3c0d2f0f6a48560d
+  digest: sha256:ea3aa7d774aab9c155a5cce373cfebc591af4500e7bbe47efe6ab710e42a4bdc
 identity:
   issuer: https://keycloak.perkforge.home.arpa/auth/realms/perkforge
   clientId: portal-local
