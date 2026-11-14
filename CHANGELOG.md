@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.3.0...v2.3.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* select published Portal identity observation image ([#26](https://github.com/perkforge/perkforge-tenant-portal/issues/26)) ([2d0ff21](https://github.com/perkforge/perkforge-tenant-portal/commit/2d0ff212062148068fa7ffe6b558cab6c7624ba8))
+
 ## [2.3.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.2.0...v2.3.0) (2026-11-14)
 
 
