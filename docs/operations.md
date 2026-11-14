@@ -1,12 +1,11 @@
 # Physical restore approval gates
 
-The current source proposal for [Portal #12](https://github.com/perkforge/perkforge-portal/issues/12)
-uses `gitops/clusters/local` for an enabled physical source release candidate.
-Only its local HelmRelease is unsuspended. Independent enrollment still pins
-disabled v2.0.0 and remains suspended; no deployment is implied.
-It pins the existing v0.4.0 image digest
-`sha256:b3418ab6d8170424523feadb83bcd3bbbc5c22cf944309565828010b6ad12941`.
-It does not deploy, release, create credentials, or redesign the application.
+The physical Portal is enrolled and active. This source update selects the normally
+published v0.6.0 identity-observation image while preserving the existing pinned
+inventory baseline and all runtime permissions. Publishing configuration alone does
+not update the live image; coordinate exact enrollment/platform pins and verify
+runtime acceptance. The original prerequisites below are retained as a checklist,
+not a claim that the current deployment remains paused.
 
 Before enrolling this activation candidate:
 
@@ -168,10 +167,10 @@ reader; this content proves only declared source selection, not tenant identity,
 user membership or successful deployment. No inventory input is enabled by this
 chart change alone.
 
-## Inventory activation candidate
+## Published-source baseline and identity observations
 
-Local selects Portal v0.5.0 checked image `sha256:eaa66ab13be20079f188f4b5d8c5d79e274612f0f5742a8d3c0d2f0f6a48560d`
-(source `cf5d27d2b9dfb5eda55929f2d648b70c85df3852`) and generated inventory from
+Local selects Portal v0.6.0 checked image `sha256:ea3aa7d774aab9c155a5cce373cfebc591af4500e7bbe47efe6ab710e42a4bdc`
+(source `4b61485399faf697769331edc2cd2129ab972ea9`) and generated inventory from
 enrollment v2.4.0 commit `49839241472c17e73b0562d43983d07347b26f58`.
 This is a labeled immutable **published-source baseline**, not the cluster's
 current root or reconciliation inventory. Enrollment pins Portal configuration,

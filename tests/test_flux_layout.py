@@ -74,7 +74,7 @@ class FluxLayoutTests(unittest.TestCase):
                     self.assertEqual({o['kind'] for o in rendered}, {'Deployment', 'Service', 'ConfigMap'})
                     deployment = next(o for o in rendered if o['kind'] == 'Deployment')
                     self.assertEqual(deployment['spec']['template']['spec']['containers'][0]['image'],
-                        'ghcr.io/perkforge/perkforge-portal@sha256:eaa66ab13be20079f188f4b5d8c5d79e274612f0f5742a8d3c0d2f0f6a48560d')
+                        'ghcr.io/perkforge/perkforge-portal@sha256:ea3aa7d774aab9c155a5cce373cfebc591af4500e7bbe47efe6ab710e42a4bdc')
                 else:
                     self.assertEqual(self.render(objects), [])
 
