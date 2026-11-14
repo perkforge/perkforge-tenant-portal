@@ -4,8 +4,8 @@ The current source proposal for [Portal #12](https://github.com/perkforge/perkfo
 uses `gitops/clusters/local` for an enabled physical source release candidate.
 Only its local HelmRelease is unsuspended. Independent enrollment still pins
 disabled v2.0.0 and remains suspended; no deployment is implied.
-It pins the existing v0.3.0 image digest
-`sha256:ae13143108562e9753eab40650cfcef4b53d8336e733adc6a94dbccabc0a2616`.
+It pins the existing v0.3.1 image digest
+`sha256:a391275e3ce00f6badc5d3c270dd8c6cd59743c3ca4b4ef4ee5e2cc9fe22b28c`.
 It does not deploy, release, create credentials, or redesign the application.
 
 Before enrolling this activation candidate:
@@ -124,3 +124,9 @@ its activation change is merged. Identity/TLS/credentials and positive/negative 
 dry-runs were verified first. GitLab remains disabled; successful Home-user login and
 actual kubelet image pull are post-activation acceptance checks, not claimed results.
 The reusable chart default remains disabled.
+
+Platform-admin access uses the v0.3.1 image published from source commit
+`93929c12a7f93e7eaad6323e411ddb461c57c645` by [the normal checked-image publisher](https://github.com/perkforge/perkforge-portal/actions/runs/43543200535).
+It requires the exact signed `/platform/admins` group without a tenant role.
+Coordinate the same digest in the platform runtime contract before selecting this
+configuration release. Historical releases remain unchanged; dev stays inactive.
