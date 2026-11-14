@@ -1,7 +1,7 @@
 # Physical restore approval gates
 
 The physical Portal is enrolled and active. This source update selects the normally
-published v0.6.0 identity-observation image while preserving the existing pinned
+published v0.6.1 identity-observation image while preserving the existing pinned
 inventory baseline and all runtime permissions. Publishing configuration alone does
 not update the live image; coordinate exact enrollment/platform pins and verify
 runtime acceptance. The original prerequisites below are retained as a checklist,
@@ -169,8 +169,8 @@ chart change alone.
 
 ## Published-source baseline and identity observations
 
-Local selects Portal v0.6.0 checked image `sha256:ea3aa7d774aab9c155a5cce373cfebc591af4500e7bbe47efe6ab710e42a4bdc`
-(source `4b61485399faf697769331edc2cd2129ab972ea9`) and generated inventory from
+Local selects Portal v0.6.1 checked image `sha256:0717d4ac19910c58af20073ccd70b97af5a5cd1bae8dcde5c30127c95d02d88f`
+(source `73bf7945048767c78817bb972c2abf4a32d08733`) and generated inventory from
 enrollment v2.4.0 commit `49839241472c17e73b0562d43983d07347b26f58`.
 This is a labeled immutable **published-source baseline**, not the cluster's
 current root or reconciliation inventory. Enrollment pins Portal configuration,
@@ -182,3 +182,8 @@ Configuration CI verifies exact source bytes and actual HelmRelease valuesFrom
 wiring. Developer/default environments remain disabled. Runtime deployment
 requires coordinating enrollment/platform release pins and the reviewed exact
 image/admission contract, after the active Mattermost promotion window.
+
+The selected v0.6.1 artifact includes verified-session protection for all compiled
+architecture assets and the reviewed current identity/logging snapshot. Public
+access remains limited to the independent sign-in bootstrap and health/auth routes.
+Actual activation and owner-browser acceptance are separate from this source pin.
