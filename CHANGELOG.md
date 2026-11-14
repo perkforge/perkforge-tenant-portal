@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.1.1...v2.2.0) (2026-11-14)
+
+
+### Features
+
+* pin Portal LikeC4 identity document release ([#21](https://github.com/perkforge/perkforge-tenant-portal/issues/21)) ([1df91fb](https://github.com/perkforge/perkforge-tenant-portal/commit/1df91fbfc43d4f857f3c6ec161b246130c51cc73))
+
 ## [2.1.1](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.1.0...v2.1.1) (2026-11-14)
 
 
