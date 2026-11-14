@@ -68,13 +68,13 @@ class FluxLayoutTests(unittest.TestCase):
                 self.assertEqual(release["spec"]["chart"]["spec"]["sourceRef"]["name"],
                                  "tenant-portal")
                 self.assertEqual([ref["name"] for ref in release["spec"]["valuesFrom"]],
-                                 ["portal-defaults", "portal-environment", "portal-profile", "portal-cluster"])
+                                 ["portal-defaults", "portal-environment", "portal-profile", "portal-cluster"] + (["portal-cluster"] if cluster == "local" else []))
                 if cluster == 'local':
                     rendered = self.render(objects)
-                    self.assertEqual({o['kind'] for o in rendered}, {'Deployment', 'Service'})
+                    self.assertEqual({o['kind'] for o in rendered}, {'Deployment', 'Service', 'ConfigMap'})
                     deployment = next(o for o in rendered if o['kind'] == 'Deployment')
                     self.assertEqual(deployment['spec']['template']['spec']['containers'][0]['image'],
-                        'ghcr.io/perkforge/perkforge-portal@sha256:b3418ab6d8170424523feadb83bcd3bbbc5c22cf944309565828010b6ad12941')
+                        'ghcr.io/perkforge/perkforge-portal@sha256:eaa66ab13be20079f188f4b5d8c5d79e274612f0f5742a8d3c0d2f0f6a48560d')
                 else:
                     self.assertEqual(self.render(objects), [])
 
@@ -89,7 +89,7 @@ class FluxLayoutTests(unittest.TestCase):
         for cluster in ("local", "dev"):
             with self.subTest(cluster=cluster):
                 objects = self.render(self.build(cluster), enabled=True)
-                self.assertEqual({obj["kind"] for obj in objects}, {"Deployment", "Service"})
+                self.assertEqual({obj["kind"] for obj in objects}, {"Deployment", "Service"} | ({"ConfigMap"} if cluster == 'local' else set()))
                 pod = next(obj for obj in objects if obj["kind"] == "Deployment")["spec"]["template"]["spec"]
                 env = {item["name"]: item for item in pod["containers"][0]["env"]}
                 self.assertEqual(env["PORTAL_ORIGIN"]["value"],
@@ -126,7 +126,7 @@ class FluxLayoutTests(unittest.TestCase):
                         'requests': {'cpu': '25m', 'memory': '64Mi'},
                         'limits': {'cpu': '250m', 'memory': '192Mi'},
                     })
-                    self.assertEqual([v['name'] for v in pod['volumes']], ['identity-ca'])
+                    self.assertEqual([v['name'] for v in pod['volumes']], ['enrollment-inventory', 'identity-ca'])
 
     def test_physical_placement_requires_worker_and_excludes_control_plane(self):
         deployment = next(o for o in self.render(self.build('local'), enabled=True)

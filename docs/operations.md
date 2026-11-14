@@ -167,3 +167,19 @@ cannot silently pass CI. Runtime observations still require their own narrow
 reader; this content proves only declared source selection, not tenant identity,
 user membership or successful deployment. No inventory input is enabled by this
 chart change alone.
+
+## Inventory activation candidate
+
+Local selects Portal v0.5.0 checked image `sha256:eaa66ab13be20079f188f4b5d8c5d79e274612f0f5742a8d3c0d2f0f6a48560d`
+(source `cf5d27d2b9dfb5eda55929f2d648b70c85df3852`) and generated inventory from
+enrollment v2.4.0 commit `49839241472c17e73b0562d43983d07347b26f58`.
+This is a labeled immutable **published-source baseline**, not the cluster's
+current root or reconciliation inventory. Enrollment pins Portal configuration,
+so its baseline's own Portal application reference may lag the activated config.
+Never infer live/desired-current state from it. A truthful live source bridge
+remains separate work. No customer tenant/user inventory is claimed.
+
+Configuration CI verifies exact source bytes and actual HelmRelease valuesFrom
+wiring. Developer/default environments remain disabled. Runtime deployment
+requires coordinating enrollment/platform release pins and the reviewed exact
+image/admission contract, after the active Mattermost promotion window.

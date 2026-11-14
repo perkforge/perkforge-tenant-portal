@@ -8,6 +8,7 @@ configMapGenerator:
 - name: portal-cluster
   files:
   - values.yaml
+  - enrollment-inventory.values.yaml
 generatorOptions:
   disableNameSuffixHash: true
 commonAnnotations:
@@ -26,3 +27,11 @@ patches:
     - op: replace
       path: /spec/storageNamespace
       value: tenant-portal-release
+- target: {kind: HelmRelease, name: portal}
+  patch: |-
+    - op: add
+      path: /spec/valuesFrom/-
+      value:
+        kind: ConfigMap
+        name: portal-cluster
+        valuesKey: enrollment-inventory.values.yaml
