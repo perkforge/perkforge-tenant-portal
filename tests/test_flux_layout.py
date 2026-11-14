@@ -184,3 +184,21 @@ class FluxLayoutTests(unittest.TestCase):
                 selection.write_text(yaml.safe_dump(root, sort_keys=False))
                 with self.assertRaises(AssertionError):
                     self.build("dev", tree)
+
+    def test_inventory_values_must_use_verified_generated_key(self):
+        for cluster in ('local', 'dev'):
+            objects = self.build(cluster)
+            release = next(o for o in objects if o['kind'] == 'HelmRelease')
+            maps = {o['metadata']['name']: o for o in objects if o['kind'] == 'ConfigMap'}
+            generated = ROOT/'gitops/clusters'/cluster/'enrollment-inventory.values.yaml'
+            expected = yaml.safe_load(generated.read_text()) if generated.exists() else None
+            found = []
+            self.assertNotIn('enrollmentInventory', release['spec'].get('values', {}))
+            for ref in release['spec']['valuesFrom']:
+                value = yaml.safe_load(maps[ref['name']]['data'][ref['valuesKey']])
+                if 'enrollmentInventory' in value:
+                    self.assertEqual(ref['name'], 'portal-cluster')
+                    self.assertEqual(ref['valuesKey'], 'enrollment-inventory.values.yaml')
+                    self.assertEqual(value, expected)
+                    found.append(value)
+            self.assertEqual(len(found), 1 if expected else 0)
