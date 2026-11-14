@@ -40,7 +40,7 @@ and existing secret/account references. No live identity changes are included.
 
 Local now proposes explicit `platform-admins` server policy with client/audience
 `portal-local`; Home group defaults stay in `dev`/legacy configuration. Missing
-policy or malformed settings fail closed. Local pins the published v0.3.1 image
+policy or malformed settings fail closed. Local pins the published v0.4.0 image
 digest verified from the successful source/version registry push records. GHCR
 remains private: `portal-registry-existing` needs separately approved read-only
 pull credentials. Anonymous pulls were refused; no credential is provisioned here.

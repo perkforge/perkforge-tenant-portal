@@ -2,9 +2,9 @@
 enabled: true
 # Routing/TLS is platform-owned; this chart creates no ingress.
 portalOrigin: https://portal.perkforge.home.arpa
-# v0.3.1, verified source/version digest from the successful image publisher.
+# v0.4.0, verified source/version digest from the successful image publisher.
 image:
-  digest: sha256:a391275e3ce00f6badc5d3c270dd8c6cd59743c3ca4b4ef4ee5e2cc9fe22b28c
+  digest: sha256:b3418ab6d8170424523feadb83bcd3bbbc5c22cf944309565828010b6ad12941
 identity:
   issuer: https://keycloak.perkforge.home.arpa/auth/realms/perkforge
   clientId: portal-local
