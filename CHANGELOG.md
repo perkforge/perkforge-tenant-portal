@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.2.0...v2.3.0) (2026-11-14)
+
+
+### Features
+
+* deliver verified enrollment inventory through GitOps ConfigMap ([#23](https://github.com/perkforge/perkforge-tenant-portal/issues/23)) ([942ca93](https://github.com/perkforge/perkforge-tenant-portal/commit/942ca93b701a87ffcb44279f04f1c2cd2539cef3))
+* select published Portal inventory reader and source baseline ([#25](https://github.com/perkforge/perkforge-tenant-portal/issues/25)) ([22be777](https://github.com/perkforge/perkforge-tenant-portal/commit/22be7775e8df9fb22737f33f9fcc655c86fd0f6a))
+
 ## [2.2.0](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.1.1...v2.2.0) (2026-11-14)
 
 
