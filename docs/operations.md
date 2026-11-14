@@ -4,8 +4,8 @@ The current source proposal for [Portal #12](https://github.com/perkforge/perkfo
 uses `gitops/clusters/local` for an enabled physical source release candidate.
 Only its local HelmRelease is unsuspended. Independent enrollment still pins
 disabled v2.0.0 and remains suspended; no deployment is implied.
-It pins the existing v0.3.1 image digest
-`sha256:a391275e3ce00f6badc5d3c270dd8c6cd59743c3ca4b4ef4ee5e2cc9fe22b28c`.
+It pins the existing v0.4.0 image digest
+`sha256:b3418ab6d8170424523feadb83bcd3bbbc5c22cf944309565828010b6ad12941`.
 It does not deploy, release, create credentials, or redesign the application.
 
 Before enrolling this activation candidate:
@@ -125,8 +125,12 @@ dry-runs were verified first. GitLab remains disabled; successful Home-user logi
 actual kubelet image pull are post-activation acceptance checks, not claimed results.
 The reusable chart default remains disabled.
 
-Platform-admin access uses the v0.3.1 image published from source commit
-`93929c12a7f93e7eaad6323e411ddb461c57c645` by [the normal checked-image publisher](https://github.com/perkforge/perkforge-portal/actions/runs/43543200535).
+Platform-admin access uses the v0.4.0 image published from source commit
+`5781db4d30af635f4ced0602619b0b8635682af1` by [the normal checked-image publisher](https://github.com/perkforge/perkforge-portal/actions/runs/43551607257).
 It requires the exact signed `/platform/admins` group without a tenant role.
 Coordinate the same digest in the platform runtime contract before selecting this
 configuration release. Historical releases remain unchanged; dev stays inactive.
+
+## LikeC4 identity document rollout
+
+The v0.4.0 image bundles the reviewed identity lifecycle and official LikeC4 renderer at build time. It is the same checked image for every target; only deployment inputs vary. Open `/#/explore/identityLifecycle` to review node installer, bootstrap, human, GitOps, OpenBao/ESO and tenant workload identities. Future external workload/RDS identity remains explicitly planned. This is sanitized documentation, not live security evidence. No runtime privileges, credentials, egress or auth policies change. Config publication alone does not promote enrollment; coordinate the matching runtime-contract image allowlist and published config ref.
