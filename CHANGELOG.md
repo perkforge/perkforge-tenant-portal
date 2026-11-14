@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.3](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.3.2...v2.3.3) (2026-11-14)
+
+
+### Bug Fixes
+
+* select current architecture Portal image ([8755aa1](https://github.com/perkforge/perkforge-tenant-portal/commit/8755aa164999c2732c6c6659adbc0dd811ce1e38))
+* select current architecture Portal image ([6beb3dc](https://github.com/perkforge/perkforge-tenant-portal/commit/6beb3dcbb3b877e87c80fc0e5f3edaf0af1aaaea))
+
 ## [2.3.2](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.3.1...v2.3.2) (2026-11-14)
 
 
