@@ -1,4 +1,4 @@
-# Physical activation candidate; enrollment remains independently pinned and suspended.
+# Physical deployment; image changes require coordinated enrollment/platform pins.
 enabled: true
 # Routing/TLS is platform-owned; this chart creates no ingress.
 portalOrigin: https://portal.perkforge.home.arpa
