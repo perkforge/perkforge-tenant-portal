@@ -137,8 +137,12 @@ The v0.4.0 image bundles the reviewed identity lifecycle and official LikeC4 ren
 
 ## GitOps enrollment inventory (inactive until promoted)
 
-The chart can deliver a generated inventory ConfigMap via its existing namespaced
-deployer; no ServiceAccount, RBAC, network rule or external runtime call is added.
+The chart can deliver a generated inventory ConfigMap through the namespaced
+deployer identity; this PR adds no ServiceAccount, RBAC, network rule or external
+runtime call. Current deployer permissions do not allow ConfigMaps, and current
+runtime admission permits only the identity CA mount/environment. A separately
+reviewed exact-object ConfigMap permission and admission extension is required
+before activation; do not widen access or disable admission to make this render.
 Default inventory mode is disabled. Do not enable with an image predating the
 Portal inventory reader. App image and config release promotion remain separate.
 
