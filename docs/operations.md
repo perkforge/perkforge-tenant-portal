@@ -1,7 +1,7 @@
 # Physical restore approval gates
 
 The physical Portal is enrolled and active. This source update selects the normally
-published v0.7.0 identity-observation image while preserving the existing pinned
+published v0.7.1 identity-observation image while preserving the existing pinned
 inventory baseline and all runtime permissions. Publishing configuration alone does
 not update the live image; coordinate exact enrollment/platform pins and verify
 runtime acceptance. The original prerequisites below are retained as a checklist,
@@ -169,8 +169,8 @@ chart change alone.
 
 ## Published-source baseline and identity observations
 
-Local selects Portal v0.7.0 checked image `sha256:9f295b4f9b0ecfe48c1e7ce3c28f321dab661357c4caa0f13140676264fb51b1`
-(source `b60cac4bc164e92972eac94a726c0879a3cbcce0`) and generated inventory from
+Local selects Portal v0.7.1 checked image `sha256:1aff18f27bb6a2354661ddf89664b686796a01387658d6f0ed134114786b02a8`
+(source `12aee8f7deee1aed81bb40430994f5dc2bb6de78`) and generated inventory from
 enrollment v2.4.0 commit `49839241472c17e73b0562d43983d07347b26f58`.
 This is a labeled immutable **published-source baseline**, not the cluster's
 current root or reconciliation inventory. Enrollment pins Portal configuration,
@@ -183,15 +183,17 @@ wiring. Developer/default environments remain disabled. Runtime deployment
 requires coordinating enrollment/platform release pins and the reviewed exact
 image/admission contract, after the active Mattermost promotion window.
 
-The selected v0.7.0 artifact includes verified-session protection for all compiled
+The selected v0.7.1 artifact includes verified-session protection for all compiled
 architecture assets and the reviewed current identity/logging snapshot. Public
 access remains limited to the independent sign-in bootstrap and health/auth routes.
 Actual activation and owner-browser acceptance are separate from this source pin.
 
-The v0.7.0 artifact includes the dated scoped-logging identity checkpoint, all
+The v0.7.1 artifact includes the dated scoped-logging identity checkpoint, all
 reviewed delivery workflow inventory and generic backup/restore flows. Its
 source also contains explicitly unsaved tenant-request preview code and a
 membership execution contract, not delivered CRUD. This configuration adds no
 preview context digest/mount, so previews remain unavailable; no identity,
-permission or session-auth setting changes. Normal publisher run 43608576188
+permission or session-auth setting changes. Normal publisher run 43620774611
 verified checked-build, source-tag and version-tag digest agreement.
+
+The final model records Viewer-only tenant log mapping, bounded native denial proof, retained cursor migration and writer-health alert limits. Actual tenant-human login, wider lifecycle and lossless/restart guarantees remain explicitly unverified. This pin changes no identity setting, preview input or other runtime configuration.
