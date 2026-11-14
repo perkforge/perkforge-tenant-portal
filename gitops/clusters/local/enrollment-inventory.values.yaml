@@ -1,0 +1,39 @@
+enrollmentInventory:
+  enabled: true
+  sourceCommit: 49839241472c17e73b0562d43983d07347b26f58
+  sourceTag: v2.4.0
+  selector: local-nextcloud-portal
+  sha256: 9513d136ddfd037698110772af48210e7a19c63bc8944281e6d75b6f644c650f
+  content: "{\n  \"evidenceType\": \"declared-enrollment-selection\",\n  \"schemaVersion\"\
+    : 1,\n  \"selections\": {\n    \"dev\": [\n      {\n        \"name\": \"tenant-portal\"\
+    ,\n        \"namespace\": \"tenant-example-portal\",\n        \"path\": \"./gitops/clusters/dev\"\
+    ,\n        \"source\": {\n          \"name\": \"tenant-portal\",\n          \"\
+    namespace\": \"tenant-example-portal\",\n          \"ref\": {\n            \"\
+    tag\": \"v2.0.0\"\n          },\n          \"suspended\": true\n        },\n \
+    \       \"suspended\": true,\n        \"targetNamespace\": \"tenant-example-portal\"\
+    \n      }\n    ],\n    \"local\": [\n      {\n        \"name\": \"tenant-portal\"\
+    ,\n        \"namespace\": \"tenant-portal-config\",\n        \"path\": \"./gitops/clusters/local\"\
+    ,\n        \"source\": {\n          \"name\": \"tenant-portal\",\n          \"\
+    namespace\": \"tenant-portal-config\",\n          \"ref\": {\n            \"tag\"\
+    : \"v2.0.0\"\n          },\n          \"suspended\": true\n        },\n      \
+    \  \"suspended\": true,\n        \"targetNamespace\": \"tenant-portal-config\"\
+    \n      }\n    ],\n    \"local-nextcloud\": [\n      {\n        \"name\": \"tenant-nextcloud\"\
+    ,\n        \"namespace\": \"tenant-home-nextcloud-config\",\n        \"path\"\
+    : \"./gitops/clusters/local\",\n        \"source\": {\n          \"name\": \"\
+    tenant-nextcloud\",\n          \"namespace\": \"tenant-home-nextcloud-config\"\
+    ,\n          \"ref\": {\n            \"tag\": \"v1.1.3\"\n          },\n     \
+    \     \"suspended\": false\n        },\n        \"suspended\": false,\n      \
+    \  \"targetNamespace\": \"tenant-home-nextcloud-config\"\n      }\n    ],\n  \
+    \  \"local-nextcloud-portal\": [\n      {\n        \"name\": \"tenant-nextcloud\"\
+    ,\n        \"namespace\": \"tenant-home-nextcloud-config\",\n        \"path\"\
+    : \"./gitops/clusters/local\",\n        \"source\": {\n          \"name\": \"\
+    tenant-nextcloud\",\n          \"namespace\": \"tenant-home-nextcloud-config\"\
+    ,\n          \"ref\": {\n            \"tag\": \"v1.1.3\"\n          },\n     \
+    \     \"suspended\": false\n        },\n        \"suspended\": false,\n      \
+    \  \"targetNamespace\": \"tenant-home-nextcloud-config\"\n      },\n      {\n\
+    \        \"name\": \"tenant-portal\",\n        \"namespace\": \"tenant-portal-config\"\
+    ,\n        \"path\": \"./gitops/clusters/local\",\n        \"source\": {\n   \
+    \       \"name\": \"tenant-portal\",\n          \"namespace\": \"tenant-portal-config\"\
+    ,\n          \"ref\": {\n            \"tag\": \"v2.2.0\"\n          },\n     \
+    \     \"suspended\": false\n        },\n        \"suspended\": false,\n      \
+    \  \"targetNamespace\": \"tenant-portal-config\"\n      }\n    ]\n  }\n}\n"
