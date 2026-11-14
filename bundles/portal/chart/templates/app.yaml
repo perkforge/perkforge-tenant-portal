@@ -14,6 +14,17 @@
 {{- if not (hasPrefix "https://" .Values.identity.issuer) }}
 {{- fail "A reviewed HTTPS identity issuer is required" }}
 {{- end }}
+{{- if .Values.enrollmentInventory.enabled }}
+{{- if not (regexMatch "^[a-f0-9]{40}$" .Values.enrollmentInventory.sourceCommit) }}
+{{- fail "Inventory requires immutable sourceCommit" }}
+{{- end }}
+{{- if not (has .Values.enrollmentInventory.selector (list "local" "dev" "local-nextcloud" "local-nextcloud-portal")) }}
+{{- fail "Inventory requires explicit supported selector" }}
+{{- end }}
+{{- if or (gt (len .Values.enrollmentInventory.content) 131072) (ne (sha256sum .Values.enrollmentInventory.content) .Values.enrollmentInventory.sha256) }}
+{{- fail "Inventory content must match reviewed SHA256 and size limit" }}
+{{- end }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,6 +43,10 @@ spec:
   template:
     metadata:
       labels: *labels
+      {{- if .Values.enrollmentInventory.enabled }}
+      annotations:
+        checksum/enrollment-inventory: {{ .Values.enrollmentInventory.sha256 | quote }}
+      {{- end }}
     spec:
       serviceAccountName: {{ required "serviceAccount.name must reference an approved existing account" .Values.serviceAccount.name | quote }}
       automountServiceAccountToken: false
@@ -51,14 +66,21 @@ spec:
       hostAliases:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.identity.caConfigMap }}
+      {{- if or .Values.identity.caConfigMap .Values.enrollmentInventory.enabled }}
       volumes:
+      {{- if .Values.enrollmentInventory.enabled }}
+      - name: enrollment-inventory
+        configMap:
+          name: {{ .Release.Name }}-enrollment-inventory
+      {{- end }}
+      {{- if .Values.identity.caConfigMap }}
       - name: identity-ca
         configMap:
           name: {{ .Values.identity.caConfigMap | quote }}
           items:
           - key: ca.crt
             path: ca.crt
+      {{- end }}
       {{- end }}
       securityContext:
         runAsNonRoot: true
@@ -78,13 +100,30 @@ spec:
         ports:
         - name: http
           containerPort: 3000
-        {{- if .Values.identity.caConfigMap }}
+        {{- if or .Values.identity.caConfigMap .Values.enrollmentInventory.enabled }}
         volumeMounts:
+        {{- if .Values.enrollmentInventory.enabled }}
+        - name: enrollment-inventory
+          mountPath: /etc/portal/enrollment
+          readOnly: true
+        {{- end }}
+        {{- if .Values.identity.caConfigMap }}
         - name: identity-ca
           mountPath: /etc/portal/identity-ca
           readOnly: true
         {{- end }}
+        {{- end }}
         env:
+        {{- if .Values.enrollmentInventory.enabled }}
+        - name: ENROLLMENT_SOURCE
+          value: gitops-configmap
+        - name: ENROLLMENT_SOURCE_COMMIT
+          value: {{ .Values.enrollmentInventory.sourceCommit | quote }}
+        - name: ENROLLMENT_SELECTOR
+          value: {{ .Values.enrollmentInventory.selector | quote }}
+        - name: ENROLLMENT_INVENTORY_SHA256
+          value: {{ .Values.enrollmentInventory.sha256 | quote }}
+        {{- end }}
         {{- if .Values.identity.caConfigMap }}
         - name: NODE_EXTRA_CA_CERTS
           value: /etc/portal/identity-ca/ca.crt
@@ -140,4 +179,15 @@ spec:
   - name: http
     port: 3000
     targetPort: http
+{{- end }}
+
+{{- if and .Values.enabled .Values.enrollmentInventory.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-enrollment-inventory
+  namespace: {{ .Release.Namespace }}
+data:
+  enrollment-inventory.json: {{ .Values.enrollmentInventory.content | quote }}
 {{- end }}

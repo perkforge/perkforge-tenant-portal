@@ -134,3 +134,32 @@ configuration release. Historical releases remain unchanged; dev stays inactive.
 ## LikeC4 identity document rollout
 
 The v0.4.0 image bundles the reviewed identity lifecycle and official LikeC4 renderer at build time. It is the same checked image for every target; only deployment inputs vary. Open `/#/explore/identityLifecycle` to review node installer, bootstrap, human, GitOps, OpenBao/ESO and tenant workload identities. Future external workload/RDS identity remains explicitly planned. This is sanitized documentation, not live security evidence. No runtime privileges, credentials, egress or auth policies change. Config publication alone does not promote enrollment; coordinate the matching runtime-contract image allowlist and published config ref.
+
+## GitOps enrollment inventory (inactive until promoted)
+
+The chart can deliver a generated inventory ConfigMap via its existing namespaced
+deployer; no ServiceAccount, RBAC, network rule or external runtime call is added.
+Default inventory mode is disabled. Do not enable with an image predating the
+Portal inventory reader. App image and config release promotion remain separate.
+
+After publishing the reviewed enrollment producer, materialize the input using:
+
+```sh
+python3 scripts/inventory_values.py --checkout /path/to/enrollment-checkout \
+  --tag vX.Y.Z --selector local-nextcloud-portal \
+  --output gitops/clusters/local/enrollment-inventory.values.yaml
+```
+
+Add the generated file to the cluster's existing `portal-cluster` ConfigMap
+generator as a separate key, and append a HelmRelease `valuesFrom` entry for that
+key after ordinary cluster values. Never paste inventory manually. CI verifies
+every generated cluster file against its published tag/resolved commit and exact
+artifact bytes; chart and reader both check SHA256. The chart mounts it read-only
+at the fixed path and rolls the pod on hash changes. The image stays BODA.
+
+Updating the desired enrollment requires regenerating/publishing the dependent
+app configuration through PR, not a separate runtime snapshot task. Stale files
+cannot silently pass CI. Runtime observations still require their own narrow
+reader; this content proves only declared source selection, not tenant identity,
+user membership or successful deployment. No inventory input is enabled by this
+chart change alone.
