@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.2](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.3.1...v2.3.2) (2026-11-14)
+
+
+### Bug Fixes
+
+* select published authenticated architecture image ([#28](https://github.com/perkforge/perkforge-tenant-portal/issues/28)) ([1442371](https://github.com/perkforge/perkforge-tenant-portal/commit/1442371e5916a41e98d9374011163eb91329a0ac))
+
 ## [2.3.1](https://github.com/perkforge/perkforge-tenant-portal/compare/v2.3.0...v2.3.1) (2026-11-14)
 
 
